@@ -1,0 +1,17 @@
+poison log app
+
+* create a Qt/QML 6.12 app in this directory. it should run on desktop linux initially.
+* this app is used to allow the user to note on a map where they have applied herbicides/pesticides.
+* the map should be a top down view of a piece of land, specified by address. there should be about 1 acre of land around the main structure visible.
+* the user enters the address, and can position the area around the structure, then clicks ok, and the image of the land is stored.
+* further operations on the map are done visually on the saved map, the map is fixed at that point.
+* when the user is looking at the map, they can drag rectangles on the map (multiple rectangles).
+* then they can enter some text in a text box to describe what was applied, how much, etc.
+* the description has a date field, and a tag name, and a color to draw the rectangle as well.
+* the user clicks "commit" and the info related to the rectangles and notes are stored in an sqlite database.
+* on the main windows, there is also a list on the side that lists all the committed records, sorted by date, newest to oldest.
+* selecting one of the records in the list displays the rectangles and notes on the map.
+* if the user is in the middle of entering new rectangles and notes, those must be saved, even if the user clicks an item in the list.
+* there is a button to resume editing after the user clicks away to view other notes.
+* the application should always start showing the partially entered notes.
+* there is a button to clear partially entered notes and discard them.
