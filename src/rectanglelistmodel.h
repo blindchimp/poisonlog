@@ -8,6 +8,7 @@ struct MapRectangle {
     double y = 0.0;
     double w = 0.0;
     double h = 0.0;
+    QString color;
 };
 
 class RectangleListModel : public QAbstractListModel
@@ -21,6 +22,7 @@ public:
         YRole,
         WRole,
         HRole,
+        ColorRole,
     };
 
     explicit RectangleListModel(QObject *parent = nullptr);

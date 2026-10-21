@@ -41,6 +41,7 @@ public:
         double w = 0.0;
         double h = 0.0;
         int sort = 0;
+        QString color;
     };
 
     static constexpr const char *DefaultColor = "#2e7d32";

@@ -126,7 +126,8 @@ bool Database::ensureSchema(QString *error)
             " y REAL NOT NULL,"
             " w REAL NOT NULL,"
             " h REAL NOT NULL,"
-            " sort INTEGER NOT NULL"
+            " sort INTEGER NOT NULL,"
+            " color TEXT NOT NULL DEFAULT ''"
             ")"),
         QStringLiteral(
             "CREATE UNIQUE INDEX IF NOT EXISTS records_one_draft "
@@ -154,8 +155,50 @@ bool Database::ensureSchema(QString *error)
         }
     }
 
+    int version = 1;
+    {
+        QSqlQuery versionRead(*m_db);
+        if (versionRead.exec(QStringLiteral("PRAGMA user_version")) && versionRead.next())
+            version = versionRead.value(0).toInt();
+    }
+
+    if (version < 2) {
+        bool hasColorColumn = false;
+        {
+            QSqlQuery info(*m_db);
+            if (info.exec(QStringLiteral("PRAGMA table_info(rectangles)"))) {
+                while (info.next()) {
+                    if (info.value(1).toString() == QStringLiteral("color")) {
+                        hasColorColumn = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (!hasColorColumn) {
+            QSqlQuery migrate(*m_db);
+            if (!migrate.exec(QStringLiteral(
+                    "ALTER TABLE rectangles ADD COLUMN color TEXT NOT NULL DEFAULT ''"))) {
+                failQuery(migrate, error,
+                          QStringLiteral("Could not upgrade the database schema"));
+                m_db->rollback();
+                return false;
+            }
+            QSqlQuery backfill(*m_db);
+            if (!backfill.exec(QStringLiteral(
+                    "UPDATE rectangles SET color ="
+                    " (SELECT color FROM records WHERE records.id = rectangles.record_id)"))) {
+                failQuery(backfill, error,
+                          QStringLiteral("Could not upgrade the database schema"));
+                m_db->rollback();
+                return false;
+            }
+        }
+    }
+
     QSqlQuery versionQuery(*m_db);
-    if (!versionQuery.exec(QStringLiteral("PRAGMA user_version = 1"))) {
+    if (!versionQuery.exec(QStringLiteral("PRAGMA user_version = 2"))) {
         failQuery(versionQuery, error, QStringLiteral("Could not set the schema version"));
         m_db->rollback();
         return false;
@@ -393,7 +436,7 @@ QVector<Database::Rect> Database::rectangles(int recordId, QString *error) const
 
     QSqlQuery query(*m_db);
     query.prepare(QStringLiteral(
-        "SELECT x, y, w, h, sort FROM rectangles"
+        "SELECT x, y, w, h, sort, color FROM rectangles"
         " WHERE record_id = ? ORDER BY sort, id"));
     query.addBindValue(recordId);
     if (!query.exec()) {
@@ -408,6 +451,7 @@ QVector<Database::Rect> Database::rectangles(int recordId, QString *error) const
         rect.w = query.value(2).toDouble();
         rect.h = query.value(3).toDouble();
         rect.sort = query.value(4).toInt();
+        rect.color = query.value(5).toString();
         rectangles.append(rect);
     }
     return rectangles;
@@ -436,7 +480,8 @@ bool Database::replaceRectangles(int recordId, const QVector<Rect> &rectangles, 
 
     QSqlQuery insert(*m_db);
     insert.prepare(QStringLiteral(
-        "INSERT INTO rectangles (record_id, x, y, w, h, sort) VALUES (?, ?, ?, ?, ?, ?)"));
+        "INSERT INTO rectangles (record_id, x, y, w, h, sort, color)"
+        " VALUES (?, ?, ?, ?, ?, ?, ?)"));
     for (int i = 0; i < rectangles.size(); ++i) {
         const Rect &rect = rectangles.at(i);
         insert.addBindValue(recordId);
@@ -445,6 +490,7 @@ bool Database::replaceRectangles(int recordId, const QVector<Rect> &rectangles, 
         insert.addBindValue(rect.w);
         insert.addBindValue(rect.h);
         insert.addBindValue(i);
+        insert.addBindValue(nonNull(rect.color));
         if (!insert.exec()) {
             failQuery(insert, error, QStringLiteral("Could not save rectangles"));
             m_db->rollback();
@@ -564,7 +610,8 @@ bool Database::updateRecord(int recordId, const Record &fields,
 
     QSqlQuery insert(*m_db);
     insert.prepare(QStringLiteral(
-        "INSERT INTO rectangles (record_id, x, y, w, h, sort) VALUES (?, ?, ?, ?, ?, ?)"));
+        "INSERT INTO rectangles (record_id, x, y, w, h, sort, color)"
+        " VALUES (?, ?, ?, ?, ?, ?, ?)"));
     for (int i = 0; i < rectangles.size(); ++i) {
         const Rect &rect = rectangles.at(i);
         insert.addBindValue(recordId);
@@ -573,6 +620,7 @@ bool Database::updateRecord(int recordId, const Record &fields,
         insert.addBindValue(rect.w);
         insert.addBindValue(rect.h);
         insert.addBindValue(i);
+        insert.addBindValue(nonNull(rect.color));
         if (!insert.exec()) {
             failQuery(insert, error, QStringLiteral("Could not save rectangles"));
             m_db->rollback();

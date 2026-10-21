@@ -1,4 +1,5 @@
 #include "appstore.h"
+#include "rectanglelistmodel.h"
 
 #include <QImage>
 #include <QTemporaryDir>
@@ -20,6 +21,7 @@ private slots:
     void selectingRecordDoesNotDiscardDraft();
     void savesCommittedRecordEdits();
     void cancelsRecordEditWithoutPersisting();
+    void rectangleColorsArePerRectangle();
 
 private:
     void createMap(AppStore &store);
@@ -263,6 +265,42 @@ void TestAppStore::cancelsRecordEditWithoutPersisting()
     QCOMPARE(store->viewedRecord().value(QStringLiteral("notes")).toString(),
              QStringLiteral("Original notes"));
     QCOMPARE(store->rectangleCount(), 1);
+}
+
+void TestAppStore::rectangleColorsArePerRectangle()
+{
+    auto store = std::make_unique<AppStore>(nullptr, m_databasePath);
+    createMap(*store);
+
+    store->setDraftDate(QStringLiteral("2026-04-01"));
+    store->setDraftTag(QStringLiteral("herbicide"));
+
+    store->addDraftRectangle(0.1, 0.1, 0.2, 0.2);
+    store->setDraftColor(QStringLiteral("#c62828"));
+    store->addDraftRectangle(0.4, 0.4, 0.2, 0.2);
+    store->setDraftColor(QStringLiteral("#1565c0"));
+    store->addDraftRectangle(0.7, 0.7, 0.2, 0.2);
+
+    auto *rects = qobject_cast<RectangleListModel *>(store->rectanglesModel());
+    Q_CHECK_PTR(rects);
+    QCOMPARE(rects->rectangles().at(0).color, QString::fromLatin1(Database::DefaultColor));
+    QCOMPARE(rects->rectangles().at(1).color, QStringLiteral("#c62828"));
+    QCOMPARE(rects->rectangles().at(2).color, QStringLiteral("#1565c0"));
+
+    store->commitDraft();
+    QVERIFY2(store->errorMessage().isEmpty(), qPrintable(store->errorMessage()));
+    const int recordId = store->viewedRecordId();
+
+    store.reset();
+    store = std::make_unique<AppStore>(nullptr, m_databasePath);
+    store->selectRecord(recordId);
+    QCOMPARE(store->mode(), QStringLiteral("record"));
+
+    auto *reloaded = qobject_cast<RectangleListModel *>(store->rectanglesModel());
+    Q_CHECK_PTR(reloaded);
+    QCOMPARE(reloaded->rectangles().at(0).color, QString::fromLatin1(Database::DefaultColor));
+    QCOMPARE(reloaded->rectangles().at(1).color, QStringLiteral("#c62828"));
+    QCOMPARE(reloaded->rectangles().at(2).color, QStringLiteral("#1565c0"));
 }
 
 QTEST_GUILESS_MAIN(TestAppStore)

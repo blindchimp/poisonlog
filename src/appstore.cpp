@@ -552,6 +552,7 @@ void AppStore::saveRecordEdit()
         rect.y = item.y;
         rect.w = item.w;
         rect.h = item.h;
+        rect.color = item.color;
         stored.append(rect);
     }
 
@@ -666,6 +667,7 @@ void AppStore::addDraftRectangle(double x, double y, double width, double height
     rect.y = y;
     rect.w = width;
     rect.h = height;
+    rect.color = currentRectangleColor();
     m_rectangles.addRectangle(rect);
     if (m_mode == QStringLiteral("draft")) {
         ++m_draftRectangleCount;
@@ -692,7 +694,7 @@ void AppStore::updateDraftRectangle(int index, double x, double y, double width,
     width = std::max(MinimumRectangleSize, std::min(clamp01(width), 1.0 - x));
     height = std::max(MinimumRectangleSize, std::min(clamp01(height), 1.0 - y));
 
-    MapRectangle rect;
+    MapRectangle rect = m_rectangles.rectangles().at(index);
     rect.x = x;
     rect.y = y;
     rect.w = width;
@@ -864,6 +866,7 @@ void AppStore::loadDraftRectangles()
         item.y = rect.y;
         item.w = rect.w;
         item.h = rect.h;
+        item.color = rect.color.isEmpty() ? m_draftColor : rect.color;
         rectangles.append(item);
     }
     m_rectangles.setRectangles(rectangles);
@@ -886,12 +889,17 @@ void AppStore::loadRecordRectangles(int recordId)
 
     QVector<MapRectangle> rectangles;
     rectangles.reserve(stored.size());
+    const QString fallbackColor = m_viewedRecord.value(QStringLiteral("color")).toString();
     for (const Database::Rect &rect : stored) {
         MapRectangle item;
         item.x = rect.x;
         item.y = rect.y;
         item.w = rect.w;
         item.h = rect.h;
+        item.color = rect.color.isEmpty()
+            ? (fallbackColor.isEmpty() ? QString::fromLatin1(Database::DefaultColor)
+                                       : fallbackColor)
+            : rect.color;
         rectangles.append(item);
     }
     m_rectangles.setRectangles(rectangles);
@@ -954,6 +962,7 @@ void AppStore::persistDraftRectangles()
         rect.y = item.y;
         rect.w = item.w;
         rect.h = item.h;
+        rect.color = item.color;
         stored.append(rect);
     }
 

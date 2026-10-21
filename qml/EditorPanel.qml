@@ -131,7 +131,7 @@ Frame {
                 }
 
                 Label {
-                    text: "Color"
+                    text: "Color for new rectangles"
                     color: "#44554a"
                 }
 
@@ -375,7 +375,7 @@ Frame {
                 }
 
                 Label {
-                    text: "Color"
+                    text: "Color for new rectangles"
                     color: "#44554a"
                 }
 

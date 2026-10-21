@@ -100,6 +100,7 @@ Item {
             required property real ry
             required property real rw
             required property real rh
+            required property string rColor
 
             x: rx * root.width
             y: ry * root.height
@@ -108,13 +109,13 @@ Item {
             z: 1
             color: "transparent"
             border.width: App.selectedRectangleIndex === index ? 3 : 2
-            border.color: App.currentRectangleColor
+            border.color: rColor
             radius: 1
 
             Rectangle {
                 anchors.fill: parent
                 anchors.margins: 1
-                color: App.currentRectangleColor
+                color: rectItem.rColor
                 opacity: 0.22
             }
 
@@ -160,7 +161,7 @@ Item {
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
                 visible: App.mode === "draft" || App.mode === "record-edit"
-                color: App.currentRectangleColor
+                color: rectItem.rColor
                 border.color: "#ffffff"
                 border.width: 2
 
