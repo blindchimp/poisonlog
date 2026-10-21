@@ -636,6 +636,28 @@ bool Database::updateRecord(int recordId, const Record &fields,
     return true;
 }
 
+bool Database::deleteRecord(int recordId, QString *error)
+{
+    if (!isOpen()) {
+        setError(error, QStringLiteral("The database is not open."));
+        return false;
+    }
+
+    QSqlQuery query(*m_db);
+    query.prepare(QStringLiteral(
+        "DELETE FROM records WHERE id = ? AND status = 'committed'"));
+    query.addBindValue(recordId);
+    if (!query.exec()) {
+        failQuery(query, error, QStringLiteral("Could not delete the record"));
+        return false;
+    }
+    if (query.numRowsAffected() != 1) {
+        setError(error, QStringLiteral("The record no longer exists."));
+        return false;
+    }
+    return true;
+}
+
 bool Database::clearDraft(int draftId, const Record &defaults, QString *error)
 {
     if (!isOpen()) {

@@ -526,6 +526,36 @@ void AppStore::cancelRecordEdit()
     setStatus(QStringLiteral("Edits to the record were cancelled."));
 }
 
+void AppStore::deleteViewedRecord()
+{
+    if (!m_hasMap)
+        return;
+    if (m_mode != QStringLiteral("record")) {
+        if (editingRecord())
+            setError(QStringLiteral("Save or cancel your edits before deleting the record."));
+        return;
+    }
+
+    const int recordId = m_viewedRecordId;
+    QString error;
+    if (!m_database->deleteRecord(recordId, &error)) {
+        setError(error);
+        return;
+    }
+    refreshRecords();
+    resetViewedRecord();
+
+    const bool draftRestored = loadDraft(true);
+    setMode(QStringLiteral("draft"));
+    emit currentRectangleColorChanged();
+    if (!draftRestored) {
+        setError(QStringLiteral("The draft could not be loaded after deleting the record."));
+        return;
+    }
+    setError(QString());
+    setStatus(QStringLiteral("The saved application was deleted."));
+}
+
 void AppStore::saveRecordEdit()
 {
     if (!editingRecord())

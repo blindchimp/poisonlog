@@ -127,6 +127,7 @@ public:
     Q_INVOKABLE void startRecordEdit();
     Q_INVOKABLE void cancelRecordEdit();
     Q_INVOKABLE void saveRecordEdit();
+    Q_INVOKABLE void deleteViewedRecord();
 
     Q_INVOKABLE void addDraftRectangle(double x, double y, double width, double height);
     Q_INVOKABLE void updateDraftRectangle(int index, double x, double y, double width,

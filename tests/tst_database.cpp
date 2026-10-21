@@ -22,6 +22,7 @@ private slots:
     void clearsDraft();
     void updatesCommittedRecord();
     void migratesLegacyRectangles();
+    void deletesCommittedRecord();
 
 private:
     Database::MapInfo makeMapInfo() const;
@@ -330,6 +331,50 @@ void TestDatabase::migratesLegacyRectangles()
     const auto rectangles = m_db->rectangles(1, &error);
     QCOMPARE(rectangles.size(), 1);
     QCOMPARE(rectangles.first().color, QStringLiteral("#1565c0"));
+}
+
+void TestDatabase::deletesCommittedRecord()
+{
+    seedMap();
+    QString error;
+
+    Database::Record fields;
+    fields.date = QStringLiteral("2026-01-10");
+    fields.tag = QStringLiteral("first");
+    Database::Rect rect;
+    rect.w = 0.2;
+    rect.h = 0.2;
+    rect.color = QStringLiteral("#2e7d32");
+
+    auto draft = m_db->draft(&error);
+    QVERIFY(draft.has_value());
+    QVERIFY(m_db->replaceRectangles(draft->id, { rect }, &error));
+    const int firstId = draft->id;
+    draft.reset();
+    QVERIFY2(m_db->commitDraft(firstId, fields, nullptr, &error), qPrintable(error));
+
+    draft = m_db->draft(&error);
+    QVERIFY(draft.has_value());
+    fields.tag = QStringLiteral("second");
+    QVERIFY(m_db->replaceRectangles(draft->id, { rect }, &error));
+    const int secondDraftId = draft->id;
+    draft.reset();
+    QVERIFY2(m_db->commitDraft(secondDraftId, fields, nullptr, &error), qPrintable(error));
+
+    QCOMPARE(m_db->committedRecords(&error).size(), 2);
+    QVERIFY2(m_db->deleteRecord(firstId, &error), qPrintable(error));
+    QCOMPARE(m_db->committedRecords(&error).size(), 1);
+    QCOMPARE(m_db->committedRecords(&error).first().tag, QStringLiteral("second"));
+    QCOMPARE(m_db->rectangles(firstId, &error).size(), 0);
+    QVERIFY(!m_db->record(firstId, &error).has_value());
+
+    // Draft records cannot be deleted through this path.
+    draft = m_db->draft(&error);
+    QVERIFY(draft.has_value());
+    error.clear();
+    QVERIFY(!m_db->deleteRecord(draft->id, &error));
+    QVERIFY(!error.isEmpty());
+    QCOMPARE(m_db->committedRecords(&error).size(), 1);
 }
 
 QTEST_GUILESS_MAIN(TestDatabase)

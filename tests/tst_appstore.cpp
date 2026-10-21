@@ -22,6 +22,7 @@ private slots:
     void savesCommittedRecordEdits();
     void cancelsRecordEditWithoutPersisting();
     void rectangleColorsArePerRectangle();
+    void deletesCommittedRecordAndKeepsDraft();
 
 private:
     void createMap(AppStore &store);
@@ -301,6 +302,41 @@ void TestAppStore::rectangleColorsArePerRectangle()
     QCOMPARE(reloaded->rectangles().at(0).color, QString::fromLatin1(Database::DefaultColor));
     QCOMPARE(reloaded->rectangles().at(1).color, QStringLiteral("#c62828"));
     QCOMPARE(reloaded->rectangles().at(2).color, QStringLiteral("#1565c0"));
+}
+
+void TestAppStore::deletesCommittedRecordAndKeepsDraft()
+{
+    auto store = std::make_unique<AppStore>(nullptr, m_databasePath);
+    createMap(*store);
+
+    store->setDraftDate(QStringLiteral("2026-04-01"));
+    store->setDraftTag(QStringLiteral("herbicide"));
+    store->addDraftRectangle(0.1, 0.1, 0.2, 0.2);
+    store->commitDraft();
+    QVERIFY2(store->errorMessage().isEmpty(), qPrintable(store->errorMessage()));
+    const int recordId = store->viewedRecordId();
+
+    store->resumeDraft();
+    store->setDraftNotes(QStringLiteral("Draft note"));
+    store->addDraftRectangle(0.6, 0.6, 0.1, 0.1);
+
+    store->selectRecord(recordId);
+    QCOMPARE(store->mode(), QStringLiteral("record"));
+    QCOMPARE(store->recordCount(), 1);
+
+    store->deleteViewedRecord();
+    QCOMPARE(store->mode(), QStringLiteral("draft"));
+    QCOMPARE(store->recordCount(), 0);
+    QCOMPARE(store->viewedRecordId(), -1);
+    QCOMPARE(store->draftNotes(), QStringLiteral("Draft note"));
+    QCOMPARE(store->rectangleCount(), 1);
+
+    store.reset();
+    store = std::make_unique<AppStore>(nullptr, m_databasePath);
+    QCOMPARE(store->mode(), QStringLiteral("draft"));
+    QCOMPARE(store->recordCount(), 0);
+    QCOMPARE(store->draftNotes(), QStringLiteral("Draft note"));
+    QCOMPARE(store->rectangleCount(), 1);
 }
 
 QTEST_GUILESS_MAIN(TestAppStore)

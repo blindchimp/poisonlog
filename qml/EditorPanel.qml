@@ -220,6 +220,12 @@ Frame {
                     onClicked: App.commitDraft()
                 }
 
+                Button {
+                    Layout.fillWidth: true
+                    text: "Reset draft"
+                    onClicked: resetDraftDialog.open()
+                }
+
                 Label {
                     Layout.fillWidth: true
                     text: "Changes are saved automatically."
@@ -298,6 +304,12 @@ Frame {
                     Layout.fillWidth: true
                     text: "Edit new/uncommitted"
                     onClicked: App.resumeDraft()
+                }
+
+                Button {
+                    Layout.fillWidth: true
+                    text: "Delete record"
+                    onClicked: deleteRecordDialog.open()
                 }
             }
 
@@ -491,6 +503,38 @@ Frame {
             color: "#b71c1c"
             wrapMode: Text.WordWrap
             font.pixelSize: 12
+        }
+    }
+
+    Dialog {
+        id: resetDraftDialog
+        anchors.centerIn: parent
+        modal: true
+        title: "Discard the unfinished draft?"
+        standardButtons: Dialog.Ok | Dialog.Cancel
+
+        onAccepted: App.clearDraft()
+
+        Label {
+            width: parent.width
+            wrapMode: Text.WordWrap
+            text: "All unfinished notes and rectangles will be deleted. Committed records will not be changed."
+        }
+    }
+
+    Dialog {
+        id: deleteRecordDialog
+        anchors.centerIn: parent
+        modal: true
+        title: "Delete this record?"
+        standardButtons: Dialog.Ok | Dialog.Cancel
+
+        onAccepted: App.deleteViewedRecord()
+
+        Label {
+            width: parent.width
+            wrapMode: Text.WordWrap
+            text: "The saved application and its rectangles on the map will be permanently deleted. This cannot be undone."
         }
     }
 }
