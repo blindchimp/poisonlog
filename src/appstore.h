@@ -34,6 +34,13 @@ class AppStore : public QObject
     Q_PROPERTY(int viewedRecordId READ viewedRecordId NOTIFY viewedRecordChanged)
     Q_PROPERTY(QVariantMap viewedRecord READ viewedRecord NOTIFY viewedRecordChanged)
 
+    Q_PROPERTY(QString editDate READ editDate WRITE setEditDate NOTIFY editDateChanged)
+    Q_PROPERTY(QString editTag READ editTag WRITE setEditTag NOTIFY editTagChanged)
+    Q_PROPERTY(QString editNotes READ editNotes WRITE setEditNotes NOTIFY editNotesChanged)
+    Q_PROPERTY(QString editColor READ editColor WRITE setEditColor NOTIFY editColorChanged)
+    Q_PROPERTY(bool editingRecord READ editingRecord NOTIFY modeChanged)
+    Q_PROPERTY(bool canSaveEdit READ canSaveEdit NOTIFY canSaveEditChanged)
+
     Q_PROPERTY(QObject *recordsModel READ recordsModel CONSTANT)
     Q_PROPERTY(QObject *rectanglesModel READ rectanglesModel CONSTANT)
     Q_PROPERTY(int recordCount READ recordCount NOTIFY recordCountChanged)
@@ -73,6 +80,13 @@ public:
     int viewedRecordId() const;
     QVariantMap viewedRecord() const;
 
+    QString editDate() const;
+    QString editTag() const;
+    QString editNotes() const;
+    QString editColor() const;
+    bool editingRecord() const;
+    bool canSaveEdit() const;
+
     QObject *recordsModel();
     QObject *rectanglesModel();
     int recordCount() const;
@@ -93,6 +107,11 @@ public:
     void setDraftNotes(const QString &notes);
     void setDraftColor(const QString &color);
 
+    void setEditDate(const QString &date);
+    void setEditTag(const QString &tag);
+    void setEditNotes(const QString &notes);
+    void setEditColor(const QString &color);
+
     Q_INVOKABLE QString newMapImagePath();
     Q_INVOKABLE void finishMapSetup(const QString &address, double latitude, double longitude,
                                     double groundSpanMeters, const QString &imagePath,
@@ -104,6 +123,10 @@ public:
     Q_INVOKABLE void resumeDraft();
     Q_INVOKABLE void clearDraft();
     Q_INVOKABLE void commitDraft();
+
+    Q_INVOKABLE void startRecordEdit();
+    Q_INVOKABLE void cancelRecordEdit();
+    Q_INVOKABLE void saveRecordEdit();
 
     Q_INVOKABLE void addDraftRectangle(double x, double y, double width, double height);
     Q_INVOKABLE void updateDraftRectangle(int index, double x, double y, double width,
@@ -126,6 +149,11 @@ signals:
     void draftContentChanged();
     void canCommitChanged();
     void viewedRecordChanged();
+    void editDateChanged();
+    void editTagChanged();
+    void editNotesChanged();
+    void editColorChanged();
+    void canSaveEditChanged();
     void recordCountChanged();
     void rectangleCountChanged();
     void selectedRectangleChanged();
@@ -171,6 +199,11 @@ private:
 
     int m_viewedRecordId = -1;
     QVariantMap m_viewedRecord;
+
+    QString m_editDate;
+    QString m_editTag;
+    QString m_editNotes;
+    QString m_editColor;
 
     int m_selectedRectangleIndex = -1;
 

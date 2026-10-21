@@ -519,6 +519,75 @@ bool Database::commitDraft(int draftId, const Record &fields, int *committedId, 
     return true;
 }
 
+bool Database::updateRecord(int recordId, const Record &fields,
+                            const QVector<Rect> &rectangles, QString *error)
+{
+    if (!isOpen()) {
+        setError(error, QStringLiteral("The database is not open."));
+        return false;
+    }
+    if (!m_db->transaction()) {
+        setError(error, QStringLiteral("Could not start the update transaction: %1")
+                            .arg(m_db->lastError().text()));
+        return false;
+    }
+
+    QSqlQuery update(*m_db);
+    update.prepare(QStringLiteral(
+        "UPDATE records SET date = ?, tag = ?, color = ?, notes = ?, updated_at = ?"
+        " WHERE id = ? AND status = 'committed'"));
+    update.addBindValue(nonNull(fields.date));
+    update.addBindValue(nonNull(fields.tag));
+    update.addBindValue(nonNull(fields.color));
+    update.addBindValue(nonNull(fields.notes));
+    update.addBindValue(nowUtc());
+    update.addBindValue(recordId);
+    if (!update.exec()) {
+        failQuery(update, error, QStringLiteral("Could not update the record"));
+        m_db->rollback();
+        return false;
+    }
+    if (update.numRowsAffected() != 1) {
+        setError(error, QStringLiteral("The record no longer exists."));
+        m_db->rollback();
+        return false;
+    }
+
+    QSqlQuery del(*m_db);
+    del.prepare(QStringLiteral("DELETE FROM rectangles WHERE record_id = ?"));
+    del.addBindValue(recordId);
+    if (!del.exec()) {
+        failQuery(del, error, QStringLiteral("Could not replace rectangles"));
+        m_db->rollback();
+        return false;
+    }
+
+    QSqlQuery insert(*m_db);
+    insert.prepare(QStringLiteral(
+        "INSERT INTO rectangles (record_id, x, y, w, h, sort) VALUES (?, ?, ?, ?, ?, ?)"));
+    for (int i = 0; i < rectangles.size(); ++i) {
+        const Rect &rect = rectangles.at(i);
+        insert.addBindValue(recordId);
+        insert.addBindValue(rect.x);
+        insert.addBindValue(rect.y);
+        insert.addBindValue(rect.w);
+        insert.addBindValue(rect.h);
+        insert.addBindValue(i);
+        if (!insert.exec()) {
+            failQuery(insert, error, QStringLiteral("Could not save rectangles"));
+            m_db->rollback();
+            return false;
+        }
+    }
+
+    if (!m_db->commit()) {
+        setError(error, QStringLiteral("Could not update the record: %1")
+                            .arg(m_db->lastError().text()));
+        return false;
+    }
+    return true;
+}
+
 bool Database::clearDraft(int draftId, const Record &defaults, QString *error)
 {
     if (!isOpen()) {

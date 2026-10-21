@@ -18,6 +18,8 @@ private slots:
     void requiresMapAndRectangleToCommit();
     void commitThenPersistDraftAcrossNavigationAndRestart();
     void selectingRecordDoesNotDiscardDraft();
+    void savesCommittedRecordEdits();
+    void cancelsRecordEditWithoutPersisting();
 
 private:
     void createMap(AppStore &store);
@@ -165,6 +167,102 @@ void TestAppStore::selectingRecordDoesNotDiscardDraft()
     QCOMPARE(store->rectangleCount(), 0);
     QVERIFY(!store->draftHasContent());
     QCOMPARE(store->recordCount(), 1);
+}
+
+void TestAppStore::savesCommittedRecordEdits()
+{
+    auto store = std::make_unique<AppStore>(nullptr, m_databasePath);
+    createMap(*store);
+
+    store->setDraftDate(QStringLiteral("2026-04-01"));
+    store->setDraftTag(QStringLiteral("herbicide"));
+    store->setDraftNotes(QStringLiteral("Original notes"));
+    store->addDraftRectangle(0.1, 0.1, 0.2, 0.2);
+    store->commitDraft();
+    QVERIFY2(store->errorMessage().isEmpty(), qPrintable(store->errorMessage()));
+    const int recordId = store->viewedRecordId();
+    QCOMPARE(store->mode(), QStringLiteral("record"));
+
+    // Leave uncommitted draft content that must not be touched by the edit.
+    store->resumeDraft();
+    store->setDraftTag(QStringLiteral("draft tag"));
+    store->setDraftNotes(QStringLiteral("Draft note"));
+    store->addDraftRectangle(0.6, 0.6, 0.1, 0.1);
+    store->selectRecord(recordId);
+    QCOMPARE(store->mode(), QStringLiteral("record"));
+    QCOMPARE(store->rectangleCount(), 1);
+
+    store->startRecordEdit();
+    QCOMPARE(store->mode(), QStringLiteral("record-edit"));
+    QCOMPARE(store->editTag(), QStringLiteral("herbicide"));
+    QCOMPARE(store->editDate(), QStringLiteral("2026-04-01"));
+    QCOMPARE(store->editNotes(), QStringLiteral("Original notes"));
+    QCOMPARE(store->rectangleCount(), 1);
+    QVERIFY(store->canSaveEdit());
+
+    store->setEditTag(QStringLiteral("fungicide"));
+    store->setEditNotes(QStringLiteral("Updated notes"));
+    store->addDraftRectangle(0.5, 0.5, 0.2, 0.2);
+    QCOMPARE(store->rectangleCount(), 2);
+
+    // Editing a record must not modify the separate draft.
+    QCOMPARE(store->draftTag(), QStringLiteral("draft tag"));
+    QCOMPARE(store->draftNotes(), QStringLiteral("Draft note"));
+    QCOMPARE(store->draftHasContent(), true);
+
+    store->saveRecordEdit();
+    QCOMPARE(store->mode(), QStringLiteral("record"));
+    QCOMPARE(store->viewedRecord().value(QStringLiteral("tag")).toString(),
+             QStringLiteral("fungicide"));
+    QCOMPARE(store->viewedRecord().value(QStringLiteral("notes")).toString(),
+             QStringLiteral("Updated notes"));
+    QCOMPARE(store->rectangleCount(), 2);
+    QCOMPARE(store->recordCount(), 1);
+
+    store.reset();
+    store = std::make_unique<AppStore>(nullptr, m_databasePath);
+    QCOMPARE(store->mode(), QStringLiteral("draft"));
+    QCOMPARE(store->draftNotes(), QStringLiteral("Draft note"));
+    QCOMPARE(store->rectangleCount(), 1);
+
+    store->selectRecord(recordId);
+    QCOMPARE(store->mode(), QStringLiteral("record"));
+    QCOMPARE(store->viewedRecord().value(QStringLiteral("tag")).toString(),
+             QStringLiteral("fungicide"));
+    QCOMPARE(store->rectangleCount(), 2);
+}
+
+void TestAppStore::cancelsRecordEditWithoutPersisting()
+{
+    auto store = std::make_unique<AppStore>(nullptr, m_databasePath);
+    createMap(*store);
+
+    store->setDraftDate(QStringLiteral("2026-04-01"));
+    store->setDraftTag(QStringLiteral("herbicide"));
+    store->setDraftNotes(QStringLiteral("Original notes"));
+    store->addDraftRectangle(0.1, 0.1, 0.2, 0.2);
+    store->commitDraft();
+    const int recordId = store->viewedRecordId();
+
+    store->startRecordEdit();
+    store->setEditNotes(QStringLiteral("Temporary edit"));
+    store->addDraftRectangle(0.7, 0.7, 0.1, 0.1);
+    store->removeDraftRectangle(1);
+    QCOMPARE(store->rectangleCount(), 1);
+
+    store->cancelRecordEdit();
+    QCOMPARE(store->mode(), QStringLiteral("record"));
+    QCOMPARE(store->viewedRecord().value(QStringLiteral("notes")).toString(),
+             QStringLiteral("Original notes"));
+    QCOMPARE(store->rectangleCount(), 1);
+
+    store.reset();
+    store = std::make_unique<AppStore>(nullptr, m_databasePath);
+    store->selectRecord(recordId);
+    QCOMPARE(store->mode(), QStringLiteral("record"));
+    QCOMPARE(store->viewedRecord().value(QStringLiteral("notes")).toString(),
+             QStringLiteral("Original notes"));
+    QCOMPARE(store->rectangleCount(), 1);
 }
 
 QTEST_GUILESS_MAIN(TestAppStore)

@@ -55,7 +55,7 @@ ApplicationWindow {
             }
 
             Button {
-                text: "Resume editing"
+                text: "Edit new/uncommitted"
                 visible: App.mode === "record"
                 onClicked: App.resumeDraft()
             }

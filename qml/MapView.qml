@@ -35,7 +35,7 @@ Item {
     MouseArea {
         id: createArea
         anchors.fill: parent
-        enabled: App.mode === "draft"
+        enabled: App.mode === "draft" || App.mode === "record-edit"
         acceptedButtons: Qt.LeftButton
         z: 0
 
@@ -121,7 +121,7 @@ Item {
             MouseArea {
                 id: moveArea
                 anchors.fill: parent
-                enabled: App.mode === "draft"
+                enabled: App.mode === "draft" || App.mode === "record-edit"
                 acceptedButtons: Qt.LeftButton
                 cursorShape: Qt.SizeAllCursor
 
@@ -159,7 +159,7 @@ Item {
                 radius: 3
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
-                visible: App.mode === "draft"
+                visible: App.mode === "draft" || App.mode === "record-edit"
                 color: App.currentRectangleColor
                 border.color: "#ffffff"
                 border.width: 2
@@ -167,7 +167,7 @@ Item {
                 MouseArea {
                     anchors.fill: parent
                     anchors.margins: -5
-                    enabled: App.mode === "draft"
+                    enabled: App.mode === "draft" || App.mode === "record-edit"
                     cursorShape: Qt.SizeFDiagCursor
 
                     property real pressX: 0

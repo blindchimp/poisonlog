@@ -68,6 +68,8 @@ public:
 
     bool commitDraft(int draftId, const Record &fields, int *committedId, QString *error);
     bool clearDraft(int draftId, const Record &defaults, QString *error);
+    bool updateRecord(int recordId, const Record &fields, const QVector<Rect> &rectangles,
+                      QString *error);
 
 private:
     bool ensureSchema(QString *error);

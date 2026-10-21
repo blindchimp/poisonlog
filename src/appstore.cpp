@@ -27,6 +27,7 @@ AppStore::AppStore(QObject *parent, const QString &databasePath)
     auto rectanglesChanged = [this]() {
         emit rectangleCountChanged();
         emit canCommitChanged();
+        emit canSaveEditChanged();
     };
     connect(&m_rectangles, &QAbstractItemModel::rowsInserted, this, rectanglesChanged);
     connect(&m_rectangles, &QAbstractItemModel::rowsRemoved, this, rectanglesChanged);
@@ -151,6 +152,77 @@ QVariantMap AppStore::viewedRecord() const
     return m_viewedRecord;
 }
 
+QString AppStore::editDate() const
+{
+    return m_editDate;
+}
+
+QString AppStore::editTag() const
+{
+    return m_editTag;
+}
+
+QString AppStore::editNotes() const
+{
+    return m_editNotes;
+}
+
+QString AppStore::editColor() const
+{
+    return m_editColor;
+}
+
+bool AppStore::editingRecord() const
+{
+    return m_mode == QStringLiteral("record-edit");
+}
+
+bool AppStore::canSaveEdit() const
+{
+    return editingRecord() && m_rectangles.count() > 0
+        && !m_editTag.trimmed().isEmpty()
+        && QDate::fromString(m_editDate, QStringLiteral("yyyy-MM-dd")).isValid();
+}
+
+void AppStore::setEditDate(const QString &date)
+{
+    if (m_editDate == date)
+        return;
+    m_editDate = date;
+    emit editDateChanged();
+    emit canSaveEditChanged();
+}
+
+void AppStore::setEditTag(const QString &tag)
+{
+    if (m_editTag == tag)
+        return;
+    m_editTag = tag;
+    emit editTagChanged();
+    emit canSaveEditChanged();
+}
+
+void AppStore::setEditNotes(const QString &notes)
+{
+    if (m_editNotes == notes)
+        return;
+    m_editNotes = notes;
+    emit editNotesChanged();
+}
+
+void AppStore::setEditColor(const QString &color)
+{
+    const QColor parsed(color);
+    if (!parsed.isValid())
+        return;
+    const QString normalized = parsed.name();
+    if (m_editColor == normalized)
+        return;
+    m_editColor = normalized;
+    emit editColorChanged();
+    emit currentRectangleColorChanged();
+}
+
 QObject *AppStore::recordsModel()
 {
     return &m_records;
@@ -184,6 +256,8 @@ bool AppStore::hasSelectedRectangle() const
 
 QString AppStore::currentRectangleColor() const
 {
+    if (m_mode == QStringLiteral("record-edit"))
+        return m_editColor;
     if (m_mode == QStringLiteral("record")) {
         const QString color = m_viewedRecord.value(QStringLiteral("color")).toString();
         if (!color.isEmpty())
@@ -350,6 +424,10 @@ void AppStore::selectRecord(int recordId)
 {
     if (!m_hasMap)
         return;
+    if (editingRecord()) {
+        setError(QStringLiteral("Save or cancel your edits before selecting another record."));
+        return;
+    }
 
     if (m_mode == QStringLiteral("draft")) {
         persistDraftFields();
@@ -377,6 +455,10 @@ void AppStore::resumeDraft()
 {
     if (!m_hasMap)
         return;
+    if (editingRecord()) {
+        setError(QStringLiteral("Save or cancel your edits before editing the new/uncommitted application."));
+        return;
+    }
     if (!loadDraft(true)) {
         setError(QStringLiteral("The draft could not be loaded."));
         return;
@@ -384,7 +466,117 @@ void AppStore::resumeDraft()
     resetViewedRecord();
     setMode(QStringLiteral("draft"));
     setError(QString());
-    setStatus(QStringLiteral("Editing the unfinished draft."));
+    setStatus(QStringLiteral("Editing the new/uncommitted application."));
+}
+
+void AppStore::startRecordEdit()
+{
+    if (!m_hasMap)
+        return;
+    if (m_viewedRecordId < 0 || m_viewedRecord.isEmpty()) {
+        setError(QStringLiteral("Select a record before editing it."));
+        return;
+    }
+
+    QString error;
+    const auto record = m_database->record(m_viewedRecordId, &error);
+    if (!record) {
+        setError(error.isEmpty() ? QStringLiteral("The record could not be found.") : error);
+        return;
+    }
+
+    m_editDate = record->date;
+    m_editTag = record->tag;
+    m_editNotes = record->notes;
+    m_editColor = record->color.isEmpty() ? QString::fromLatin1(Database::DefaultColor)
+                                          : record->color;
+    loadRecordRectangles(record->id);
+
+    emit editDateChanged();
+    emit editTagChanged();
+    emit editNotesChanged();
+    emit editColorChanged();
+    emit canSaveEditChanged();
+
+    setMode(QStringLiteral("record-edit"));
+    setError(QString());
+    setStatus(QStringLiteral("Editing the saved application."));
+}
+
+void AppStore::cancelRecordEdit()
+{
+    if (!editingRecord())
+        return;
+
+    const int recordId = m_viewedRecordId;
+    QString error;
+    const auto record = m_database->record(recordId, &error);
+    if (!record) {
+        setError(error.isEmpty() ? QStringLiteral("The record could not be reloaded.") : error);
+        return;
+    }
+
+    m_viewedRecord = recordToMap(*record);
+    loadRecordRectangles(recordId);
+    emit viewedRecordChanged();
+
+    setMode(QStringLiteral("record"));
+    emit currentRectangleColorChanged();
+    setError(QString());
+    setStatus(QStringLiteral("Edits to the record were cancelled."));
+}
+
+void AppStore::saveRecordEdit()
+{
+    if (!editingRecord())
+        return;
+    if (!canSaveEdit()) {
+        setError(QStringLiteral("Add at least one rectangle, a tag, and a valid date."));
+        return;
+    }
+
+    const int recordId = m_viewedRecordId;
+
+    Database::Record fields;
+    fields.date = m_editDate;
+    fields.tag = m_editTag.trimmed();
+    fields.color = m_editColor;
+    fields.notes = m_editNotes;
+
+    const QVector<MapRectangle> rectangles = m_rectangles.rectangles();
+    QVector<Database::Rect> stored;
+    stored.reserve(rectangles.size());
+    for (const MapRectangle &item : rectangles) {
+        Database::Rect rect;
+        rect.x = item.x;
+        rect.y = item.y;
+        rect.w = item.w;
+        rect.h = item.h;
+        stored.append(rect);
+    }
+
+    QString error;
+    if (!m_database->updateRecord(recordId, fields, stored, &error)) {
+        setError(error);
+        return;
+    }
+
+    refreshRecords();
+
+    const auto record = m_database->record(recordId, &error);
+    if (!record) {
+        setError(error.isEmpty() ? QStringLiteral("The record could not be reloaded.") : error);
+        return;
+    }
+
+    m_viewedRecord = recordToMap(*record);
+    loadRecordRectangles(recordId);
+    emit viewedRecordChanged();
+
+    setMode(QStringLiteral("record"));
+    emit currentRectangleColorChanged();
+    setError(QString());
+    setStatus(QStringLiteral("The saved application was updated."));
 }
 
 void AppStore::clearDraft()
@@ -413,7 +605,7 @@ void AppStore::clearDraft()
 void AppStore::commitDraft()
 {
     if (m_mode != QStringLiteral("draft")) {
-        setError(QStringLiteral("Resume editing before committing a new application."));
+        setError(QStringLiteral("Edit the new/uncommitted application before committing."));
         return;
     }
     if (!canCommit()) {
@@ -459,7 +651,7 @@ void AppStore::commitDraft()
 
 void AppStore::addDraftRectangle(double x, double y, double width, double height)
 {
-    if (m_mode != QStringLiteral("draft"))
+    if (m_mode != QStringLiteral("draft") && !editingRecord())
         return;
 
     x = clamp01(x);
@@ -475,18 +667,22 @@ void AppStore::addDraftRectangle(double x, double y, double width, double height
     rect.w = width;
     rect.h = height;
     m_rectangles.addRectangle(rect);
-    ++m_draftRectangleCount;
+    if (m_mode == QStringLiteral("draft")) {
+        ++m_draftRectangleCount;
+        emit canCommitChanged();
+    }
     m_selectedRectangleIndex = m_rectangles.count() - 1;
     emit selectedRectangleChanged();
-    persistDraftRectangles();
-    emit draftContentChanged();
-    emit canCommitChanged();
+    if (m_mode == QStringLiteral("draft")) {
+        persistDraftRectangles();
+        emit draftContentChanged();
+    }
 }
 
 void AppStore::updateDraftRectangle(int index, double x, double y, double width,
                                     double height, bool persist)
 {
-    if (m_mode != QStringLiteral("draft"))
+    if (m_mode != QStringLiteral("draft") && !editingRecord())
         return;
     if (index < 0 || index >= m_rectangles.count())
         return;
@@ -502,12 +698,17 @@ void AppStore::updateDraftRectangle(int index, double x, double y, double width,
     rect.w = width;
     rect.h = height;
     m_rectangles.setRectangle(index, rect);
-    if (persist)
+    if (persist && m_mode == QStringLiteral("draft"))
         persistDraftRectangles();
 }
 
 void AppStore::saveDraftRectangles()
 {
+    if (!m_rectangles.count())
+        return;
+    // In record-edit mode edits stay in memory until saveRecordEdit().
+    if (editingRecord())
+        return;
     if (m_mode != QStringLiteral("draft"))
         return;
     m_draftRectangleCount = m_rectangles.count();
@@ -518,22 +719,26 @@ void AppStore::saveDraftRectangles()
 
 void AppStore::removeDraftRectangle(int index)
 {
-    if (m_mode != QStringLiteral("draft"))
+    if (m_mode != QStringLiteral("draft") && !editingRecord())
         return;
     if (index < 0 || index >= m_rectangles.count())
         return;
 
     m_rectangles.removeRectangle(index);
-    m_draftRectangleCount = m_rectangles.count();
+    if (m_mode == QStringLiteral("draft")) {
+        m_draftRectangleCount = m_rectangles.count();
+        emit canCommitChanged();
+    }
     if (m_selectedRectangleIndex == index) {
         m_selectedRectangleIndex = -1;
     } else if (m_selectedRectangleIndex > index) {
         --m_selectedRectangleIndex;
     }
     emit selectedRectangleChanged();
-    persistDraftRectangles();
-    emit draftContentChanged();
-    emit canCommitChanged();
+    if (m_mode == QStringLiteral("draft")) {
+        persistDraftRectangles();
+        emit draftContentChanged();
+    }
 }
 
 void AppStore::deleteSelectedRectangle()
@@ -715,6 +920,7 @@ void AppStore::setMode(const QString &mode)
     m_mode = mode;
     emit modeChanged();
     emit canCommitChanged();
+    emit canSaveEditChanged();
     emit currentRectangleColorChanged();
 }
 

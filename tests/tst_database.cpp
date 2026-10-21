@@ -17,6 +17,7 @@ private slots:
     void createsSchemaAndDraft();
     void commitsDraftAndOrdersRecords();
     void clearsDraft();
+    void updatesCommittedRecord();
 
 private:
     Database::MapInfo makeMapInfo() const;
@@ -177,6 +178,71 @@ void TestDatabase::clearsDraft()
     QCOMPARE(cleared->notes, QString());
     QCOMPARE(cleared->date, defaults.date);
     QCOMPARE(m_db->rectangles(cleared->id, &error).size(), 0);
+}
+
+void TestDatabase::updatesCommittedRecord()
+{
+    seedMap();
+    QString error;
+    auto draft = m_db->draft(&error);
+    QVERIFY(draft.has_value());
+
+    Database::Record fields;
+    fields.date = QStringLiteral("2026-01-10");
+    fields.tag = QStringLiteral("first");
+    fields.color = QStringLiteral("#1565c0");
+    fields.notes = QStringLiteral("Original notes");
+    Database::Rect rect;
+    rect.x = 0.1;
+    rect.y = 0.1;
+    rect.w = 0.2;
+    rect.h = 0.2;
+    QVERIFY(m_db->replaceRectangles(draft->id, { rect }, &error));
+
+    const int committedId = draft->id;
+    draft.reset();
+    QVERIFY2(m_db->commitDraft(committedId, fields, nullptr, &error), qPrintable(error));
+    const auto record = m_db->record(committedId, &error);
+    QVERIFY2(record.has_value(), qPrintable(error));
+
+    Database::Record newFields;
+    newFields.date = QStringLiteral("2026-02-02");
+    newFields.tag = QStringLiteral("updated");
+    newFields.color = QStringLiteral("#c62828");
+    newFields.notes = QStringLiteral("New notes");
+    Database::Rect r1;
+    r1.x = 0.0;
+    r1.y = 0.0;
+    r1.w = 0.1;
+    r1.h = 0.1;
+    Database::Rect r2;
+    r2.x = 0.8;
+    r2.y = 0.8;
+    r2.w = 0.15;
+    r2.h = 0.15;
+    QVERIFY2(m_db->updateRecord(committedId, newFields, { r1, r2 }, &error), qPrintable(error));
+
+    const auto reloaded = m_db->record(committedId, &error);
+    QVERIFY(reloaded.has_value());
+    QCOMPARE(reloaded->date, newFields.date);
+    QCOMPARE(reloaded->tag, newFields.tag);
+    QCOMPARE(reloaded->color, newFields.color);
+    QCOMPARE(reloaded->notes, newFields.notes);
+
+    const auto rectangles = m_db->rectangles(committedId, &error);
+    QCOMPARE(rectangles.size(), 2);
+    QCOMPARE(rectangles.at(0).x, r1.x);
+    QCOMPARE(rectangles.at(0).w, r1.w);
+    QCOMPARE(rectangles.at(1).x, r2.x);
+    QCOMPARE(rectangles.at(1).w, r2.w);
+
+    // Updating a draft record is not allowed.
+    const auto currentDraft = m_db->draft(&error);
+    QVERIFY(currentDraft.has_value());
+    QVERIFY(currentDraft->id != committedId);
+    error.clear();
+    QVERIFY(!m_db->updateRecord(currentDraft->id, newFields, { r1 }, &error));
+    QVERIFY(!error.isEmpty());
 }
 
 QTEST_GUILESS_MAIN(TestDatabase)

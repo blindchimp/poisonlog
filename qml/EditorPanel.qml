@@ -26,7 +26,9 @@ Frame {
         RowLayout {
             Layout.fillWidth: true
             Label {
-                text: App.mode === "draft" ? "Application details" : "Saved application"
+                text: App.mode === "draft" ? "Application details"
+                    : App.mode === "record-edit" ? "Edit saved application"
+                    : "Saved application"
                 font.pixelSize: 18
                 font.bold: true
                 color: "#24382a"
@@ -40,12 +42,20 @@ Frame {
                 color: "#6b7c70"
                 font.pixelSize: 11
             }
+            Label {
+                visible: App.mode === "record-edit"
+                text: "Unsaved edits"
+                color: "#b71c1c"
+                font.pixelSize: 11
+            }
         }
 
         StackLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            currentIndex: App.mode === "draft" ? 0 : 1
+            currentIndex: App.mode === "draft" ? 0
+                : App.mode === "record-edit" ? 2
+                : 1
 
             ColumnLayout {
                 id: draftPane
@@ -279,9 +289,197 @@ Frame {
 
                 Button {
                     Layout.fillWidth: true
-                    text: "Resume editing"
+                    text: "Edit record"
                     highlighted: true
+                    onClicked: App.startRecordEdit()
+                }
+
+                Button {
+                    Layout.fillWidth: true
+                    text: "Edit new/uncommitted"
                     onClicked: App.resumeDraft()
+                }
+            }
+
+            ColumnLayout {
+                id: editPane
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                spacing: 8
+
+                Connections {
+                    target: App
+                    function onEditDateChanged() {
+                        if (!editDateField.activeFocus)
+                            editDateField.text = App.editDate
+                    }
+                    function onEditTagChanged() {
+                        if (!editTagField.activeFocus)
+                            editTagField.text = App.editTag
+                    }
+                    function onEditNotesChanged() {
+                        if (!editNotesArea.activeFocus)
+                            editNotesArea.text = App.editNotes
+                    }
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 8
+
+                    Label {
+                        text: "Date"
+                        Layout.preferredWidth: 48
+                        color: "#44554a"
+                    }
+                    TextField {
+                        id: editDateField
+                        Layout.fillWidth: true
+                        text: App.editDate
+                        placeholderText: "YYYY-MM-DD"
+                        selectByMouse: true
+                        onTextChanged: {
+                            if (activeFocus && text !== App.editDate)
+                                App.editDate = text
+                        }
+                    }
+                    Button {
+                        text: "Today"
+                        onClicked: {
+                            App.editDate = Qt.formatDate(new Date(), "yyyy-MM-dd")
+                            editDateField.text = App.editDate
+                        }
+                    }
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 8
+
+                    Label {
+                        text: "Tag"
+                        Layout.preferredWidth: 48
+                        color: "#44554a"
+                    }
+                    TextField {
+                        id: editTagField
+                        Layout.fillWidth: true
+                        text: App.editTag
+                        placeholderText: "e.g. glyphosate, fertilizer"
+                        selectByMouse: true
+                        onTextChanged: {
+                            if (activeFocus && text !== App.editTag)
+                                App.editTag = text
+                        }
+                    }
+                }
+
+                Label {
+                    text: "Color"
+                    color: "#44554a"
+                }
+
+                Flow {
+                    Layout.fillWidth: true
+                    spacing: 8
+
+                    Repeater {
+                        model: root.colorPalette
+                        delegate: Rectangle {
+                            width: 28
+                            height: 28
+                            radius: 14
+                            color: modelData
+                            border.width: App.editColor.toLowerCase() === modelData ? 3 : 1
+                            border.color: App.editColor.toLowerCase() === modelData
+                                          ? "#263238" : "#ffffff"
+
+                            MouseArea {
+                                anchors.fill: parent
+                                onClicked: App.editColor = modelData
+                            }
+                        }
+                    }
+                }
+
+                Label {
+                    Layout.topMargin: 4
+                    text: "Notes — what was applied, how much, and any other details"
+                    color: "#44554a"
+                    wrapMode: Text.WordWrap
+                    Layout.fillWidth: true
+                }
+
+                ScrollView {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    clip: true
+
+                    TextArea {
+                        id: editNotesArea
+                        width: parent.width
+                        text: App.editNotes
+                        placeholderText: "Describe the application…"
+                        wrapMode: TextEdit.Wrap
+                        selectByMouse: true
+                        onTextChanged: {
+                            if (activeFocus && text !== App.editNotes)
+                                App.editNotes = text
+                        }
+                    }
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 6
+
+                    Label {
+                        text: App.rectangleCount + " rectangle(s)"
+                        color: "#5e7064"
+                    }
+                    Item {
+                        Layout.fillWidth: true
+                    }
+                    Button {
+                        text: "Delete selected"
+                        enabled: App.hasSelectedRectangle
+                        onClicked: App.deleteSelectedRectangle()
+                    }
+                }
+
+                Label {
+                    Layout.fillWidth: true
+                    text: "Drag on the map to draw a rectangle. Drag a rectangle to move it, "
+                          + "or its lower-right corner to resize it."
+                    color: "#849287"
+                    font.pixelSize: 11
+                    wrapMode: Text.WordWrap
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 6
+
+                    Button {
+                        text: "Cancel"
+                        onClicked: App.cancelRecordEdit()
+                    }
+                    Button {
+                        Layout.fillWidth: true
+                        text: "Save changes"
+                        enabled: App.canSaveEdit
+                        highlighted: true
+                        onClicked: App.saveRecordEdit()
+                    }
+                }
+
+                Label {
+                    Layout.fillWidth: true
+                    text: "Unsaved edits are forgotten if you cancel or save elsewhere."
+                    color: "#849287"
+                    font.pixelSize: 11
+                    horizontalAlignment: Text.AlignHCenter
+                    wrapMode: Text.WordWrap
                 }
             }
         }
