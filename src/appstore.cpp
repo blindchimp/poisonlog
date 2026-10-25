@@ -460,7 +460,7 @@ void AppStore::selectRecord(int recordId)
     emit viewedRecordChanged();
     emit currentRectangleColorChanged();
     setError(QString());
-    setStatus(QStringLiteral("Viewing saved application."));
+    setStatus(QStringLiteral("Viewing saved treatment."));
 }
 
 void AppStore::resumeDraft()
@@ -468,7 +468,7 @@ void AppStore::resumeDraft()
     if (!m_hasMap)
         return;
     if (editingRecord()) {
-        setError(QStringLiteral("Save or cancel your edits before editing the new/uncommitted application."));
+        setError(QStringLiteral("Save or cancel your edits before editing the draft."));
         return;
     }
     if (!loadDraft(true)) {
@@ -478,7 +478,7 @@ void AppStore::resumeDraft()
     resetViewedRecord();
     setMode(QStringLiteral("draft"));
     setError(QString());
-    setStatus(QStringLiteral("Editing the new/uncommitted application."));
+    setStatus(QStringLiteral("Editing the draft."));
 }
 
 void AppStore::startRecordEdit()
@@ -512,7 +512,7 @@ void AppStore::startRecordEdit()
 
     setMode(QStringLiteral("record-edit"));
     setError(QString());
-    setStatus(QStringLiteral("Editing the saved application."));
+    setStatus(QStringLiteral("Editing the saved treatment."));
 }
 
 void AppStore::cancelRecordEdit()
@@ -565,7 +565,7 @@ void AppStore::deleteViewedRecord()
         return;
     }
     setError(QString());
-    setStatus(QStringLiteral("The saved application was deleted."));
+    setStatus(QStringLiteral("The saved treatment was deleted."));
 }
 
 void AppStore::saveRecordEdit()
@@ -620,7 +620,7 @@ void AppStore::saveRecordEdit()
     setMode(QStringLiteral("record"));
     emit currentRectangleColorChanged();
     setError(QString());
-    setStatus(QStringLiteral("The saved application was updated."));
+    setStatus(QStringLiteral("The saved treatment was updated."));
 }
 
 void AppStore::clearDraft()
@@ -649,7 +649,7 @@ void AppStore::clearDraft()
 void AppStore::commitDraft()
 {
     if (m_mode != QStringLiteral("draft")) {
-        setError(QStringLiteral("Edit the new/uncommitted application before committing."));
+        setError(QStringLiteral("Save the current draft edits before saving the treatment."));
         return;
     }
     if (!canCommit()) {
@@ -690,7 +690,7 @@ void AppStore::commitDraft()
     emit viewedRecordChanged();
     emit currentRectangleColorChanged();
     setError(QString());
-    setStatus(QStringLiteral("Application committed."));
+    setStatus(QStringLiteral("Treatment saved."));
 }
 
 void AppStore::addDraftRectangle(double x, double y, double width, double height)

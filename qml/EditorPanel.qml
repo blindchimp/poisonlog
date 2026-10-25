@@ -26,9 +26,9 @@ Frame {
         RowLayout {
             Layout.fillWidth: true
             Label {
-                text: App.mode === "draft" ? "Application details"
-                    : App.mode === "record-edit" ? "Edit saved application"
-                    : "Saved application"
+                text: App.mode === "draft" ? "Treatment details"
+                    : App.mode === "record-edit" ? "Edit saved treatment"
+                    : "Saved treatment"
                 font.pixelSize: 18
                 font.bold: true
                 color: "#24382a"
@@ -175,7 +175,7 @@ Frame {
                         id: notesArea
                         width: parent.width
                         text: App.draftNotes
-                        placeholderText: "Describe the application…"
+                        placeholderText: "Describe the treatment…"
                         wrapMode: TextEdit.Wrap
                         selectByMouse: true
                         onTextChanged: {
@@ -214,7 +214,7 @@ Frame {
 
                 Button {
                     Layout.fillWidth: true
-                    text: "Commit application"
+                    text: "Save treatment"
                     enabled: App.canCommit
                     highlighted: true
                     onClicked: App.commitDraft()
@@ -302,7 +302,7 @@ Frame {
 
                 Button {
                     Layout.fillWidth: true
-                    text: "Edit new/uncommitted"
+                    text: "Edit draft"
                     onClicked: App.resumeDraft()
                 }
 
@@ -431,7 +431,7 @@ Frame {
                         id: editNotesArea
                         width: parent.width
                         text: App.editNotes
-                        placeholderText: "Describe the application…"
+                        placeholderText: "Describe the treatment…"
                         wrapMode: TextEdit.Wrap
                         selectByMouse: true
                         onTextChanged: {
@@ -518,7 +518,7 @@ Frame {
         Label {
             width: parent.width
             wrapMode: Text.WordWrap
-            text: "All unfinished notes and rectangles will be deleted. Committed records will not be changed."
+            text: "All unfinished notes and rectangles will be deleted. Saved treatments will not be changed."
         }
     }
 
@@ -534,7 +534,7 @@ Frame {
         Label {
             width: parent.width
             wrapMode: Text.WordWrap
-            text: "The saved application and its rectangles on the map will be permanently deleted. This cannot be undone."
+            text: "The saved treatment and its rectangles on the map will be permanently deleted. This cannot be undone."
         }
     }
 }

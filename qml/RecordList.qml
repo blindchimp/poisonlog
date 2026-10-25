@@ -115,7 +115,7 @@ Frame {
                 visible: list.count === 0
                 horizontalAlignment: Text.AlignHCenter
                 wrapMode: Text.WordWrap
-                text: "Committed applications will appear here."
+                text: "Saved treatments will appear here."
                 color: "#94a197"
             }
         }

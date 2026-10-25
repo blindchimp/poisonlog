@@ -66,7 +66,7 @@ ApplicationWindow {
             }
 
             Button {
-                text: "Edit new/uncommitted"
+                text: "Edit draft"
                 visible: App.mode === "record"
                 onClicked: App.resumeDraft()
             }
@@ -146,7 +146,7 @@ ApplicationWindow {
         Label {
             width: parent.width
             wrapMode: Text.WordWrap
-            text: "All unfinished notes and rectangles will be deleted. Committed records will not be changed."
+            text: "All unfinished notes and rectangles will be deleted. Saved treatments will not be changed."
         }
     }
 
@@ -175,7 +175,7 @@ ApplicationWindow {
             spacing: 8
 
             Label {
-                text: "Backups are created every time the application is closed. " +
+                text: "Backups are created every time Poison Log is closed. " +
                       "The folder will contain the database and the map image, " +
                       "ready to be copied to another machine."
                 wrapMode: Text.WordWrap
