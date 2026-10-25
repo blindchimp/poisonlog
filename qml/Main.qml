@@ -16,6 +16,16 @@ ApplicationWindow {
     header: ToolBar {
         visible: App.hasMap
 
+        background: Rectangle {
+            color: "#eef3ef"
+            Rectangle {
+                width: parent.width
+                height: 1
+                anchors.bottom: parent.bottom
+                color: "#d7e0d9"
+            }
+        }
+
         RowLayout {
             anchors.fill: parent
             anchors.leftMargin: 16
