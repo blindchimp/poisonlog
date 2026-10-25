@@ -305,6 +305,42 @@ bool Database::saveMap(const MapInfo &info, QString *error)
     return true;
 }
 
+bool Database::saveMapImagePath(const QString &imagePath, QString *error)
+{
+    if (!isOpen()) {
+        setError(error, QStringLiteral("The database is not open."));
+        return false;
+    }
+
+    QSqlQuery query(*m_db);
+    query.prepare(QStringLiteral("UPDATE map SET image_path = ? WHERE id = 1"));
+    query.addBindValue(imagePath);
+    if (!query.exec()) {
+        failQuery(query, error, QStringLiteral("Could not save the map image path"));
+        return false;
+    }
+    return true;
+}
+
+bool Database::backupTo(const QString &destinationFile, QString *error)
+{
+    if (!isOpen()) {
+        setError(error, QStringLiteral("The database is not open."));
+        return false;
+    }
+
+    // Produces a self-contained snapshot of the database (WAL included) that
+    // can also be executed while other write activity is in progress.
+    QSqlQuery query(*m_db);
+    query.prepare(QStringLiteral("VACUUM INTO ?"));
+    query.addBindValue(destinationFile);
+    if (!query.exec()) {
+        failQuery(query, error, QStringLiteral("Could not write the database snapshot"));
+        return false;
+    }
+    return true;
+}
+
 std::optional<Database::Record> Database::draft(QString *error) const
 {
     if (!isOpen()) {

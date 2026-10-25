@@ -23,6 +23,9 @@ private slots:
     void cancelsRecordEditWithoutPersisting();
     void rectangleColorsArePerRectangle();
     void rectangleRotationRoundTrips();
+    void mapImagePathIsRelativeToDatabase();
+    void legacyAbsoluteImagePathIsMigrated();
+    void backupProducesPortableDataFolder();
     void deletesCommittedRecordAndKeepsDraft();
 
 private:
@@ -342,6 +345,146 @@ void TestAppStore::rectangleRotationRoundTrips()
     auto *reloaded = qobject_cast<RectangleListModel *>(store->rectanglesModel());
     Q_CHECK_PTR(reloaded);
     QCOMPARE(reloaded->rectangles().at(0).rotation, 24.0);
+}
+
+void TestAppStore::mapImagePathIsRelativeToDatabase()
+{
+    const QString mapsDir = m_dir->filePath(QStringLiteral("maps"));
+    const QString imagePath = QDir(mapsDir).filePath(QStringLiteral("property.png"));
+    QDir().mkpath(mapsDir);
+    QImage image(768, 768, QImage::Format_RGB32);
+    image.fill(Qt::white);
+    QVERIFY(image.save(imagePath));
+
+    auto store = std::make_unique<AppStore>(nullptr, m_databasePath);
+    store->finishMapSetup(QStringLiteral("1 Test Lane"), 45.0, -93.0, 70.0, imagePath, 768, 768);
+    QVERIFY2(store->errorMessage().isEmpty(), qPrintable(store->errorMessage()));
+    QVERIFY(store->hasMap());
+    QCOMPARE(store->mapImageUrl().toLocalFile(), imagePath);
+
+    store.reset();
+    {
+        Database db(m_databasePath);
+        QString error;
+        QVERIFY2(db.open(&error), qPrintable(error));
+        const auto info = db.map(&error);
+        QVERIFY2(info.has_value(), qPrintable(error));
+        QCOMPARE(info->imagePath, QStringLiteral("maps/property.png"));
+    }
+
+    // The resolved URL is unchanged after an app restart.
+    store = std::make_unique<AppStore>(nullptr, m_databasePath);
+    QVERIFY(store->hasMap());
+    QCOMPARE(store->mapImageUrl().toLocalFile(), imagePath);
+
+    // Restoring the data folder somewhere else keeps working.
+    const QString movedRoot = m_dir->filePath(QStringLiteral("moved"));
+    QVERIFY(QDir().mkpath(QDir(movedRoot).filePath(QStringLiteral("maps"))));
+    QVERIFY(QFile::copy(m_databasePath, QDir(movedRoot).filePath(QStringLiteral("poisonlog.db"))));
+    QVERIFY(QFile::copy(imagePath, QDir(movedRoot).filePath(
+                QStringLiteral("maps/property.png"))));
+    auto moved = std::make_unique<AppStore>(
+        nullptr, QDir(movedRoot).filePath(QStringLiteral("poisonlog.db")));
+    QVERIFY(moved->hasMap());
+    QCOMPARE(moved->mapImageUrl().toLocalFile(),
+             QDir(QDir(movedRoot).filePath(QStringLiteral("maps")))
+                 .filePath(QStringLiteral("property.png")));
+}
+
+void TestAppStore::legacyAbsoluteImagePathIsMigrated()
+{
+    const QString mapsDir = m_dir->filePath(QStringLiteral("maps"));
+    const QString imagePath = QDir(mapsDir).filePath(QStringLiteral("property.png"));
+    QDir().mkpath(mapsDir);
+    QImage image(768, 768, QImage::Format_RGB32);
+    image.fill(Qt::white);
+    QVERIFY(image.save(imagePath));
+
+    auto store = std::make_unique<AppStore>(nullptr, m_databasePath);
+    store->finishMapSetup(QStringLiteral("1 Test Lane"), 45.0, -93.0, 70.0, imagePath, 768, 768);
+    QVERIFY2(store->errorMessage().isEmpty(), qPrintable(store->errorMessage()));
+    store.reset();
+
+    // Rewind the stored path to the pre-portability format.
+    {
+        Database db(m_databasePath);
+        QString error;
+        QVERIFY2(db.open(&error), qPrintable(error));
+        QVERIFY2(db.saveMapImagePath(imagePath, &error), qPrintable(error));
+    }
+
+    // Loading the map migrates the absolute path back to the relative form.
+    store = std::make_unique<AppStore>(nullptr, m_databasePath);
+    QVERIFY(store->hasMap());
+    QCOMPARE(store->mapImageUrl().toLocalFile(), imagePath);
+
+    store.reset();
+    Database db(m_databasePath);
+    QString error;
+    QVERIFY2(db.open(&error), qPrintable(error));
+    const auto info = db.map(&error);
+    QVERIFY2(info.has_value(), qPrintable(error));
+    QCOMPARE(info->imagePath, QStringLiteral("maps/property.png"));
+}
+
+void TestAppStore::backupProducesPortableDataFolder()
+{
+    auto store = std::make_unique<AppStore>(nullptr, m_databasePath);
+    createMap(*store);
+
+    store->setDraftDate(QStringLiteral("2026-04-03"));
+    store->setDraftTag(QStringLiteral("fumigant"));
+    store->addDraftRectangle(0.3, 0.3, 0.2, 0.2);
+    store->updateDraftRectangleRotation(0, 45.0, true);
+    store->commitDraft();
+    QVERIFY2(store->errorMessage().isEmpty(), qPrintable(store->errorMessage()));
+
+    const QString backupRoot = m_dir->filePath(QStringLiteral("backup"));
+    const QString backupDb = QDir(backupRoot).filePath(QStringLiteral("poisonlog.db"));
+    // The source image sits directly next to the database, so the backup
+    // mirrors that layout rather than forcing the maps/ layout.
+    const QString backupImage = QDir(backupRoot).filePath(QStringLiteral("property.png"));
+
+    store->setBackupFolder(backupRoot);
+    QCOMPARE(store->backupFolder(), backupRoot);
+
+    store->createBackup();
+    QVERIFY2(store->errorMessage().isEmpty(), qPrintable(store->errorMessage()));
+    QVERIFY(QFile::exists(backupDb));
+    QVERIFY(QFile::exists(backupImage));
+
+    // The backup contains the committed record and its rotated rectangle.
+    {
+        Database backup(backupDb);
+        QString error;
+        QVERIFY2(backup.open(&error), qPrintable(error));
+        const auto info = backup.map(&error);
+        QVERIFY2(info.has_value(), qPrintable(error));
+        QCOMPARE(info->address, QStringLiteral("1 Test Lane"));
+        QCOMPARE(info->imagePath, QStringLiteral("property.png"));
+        const auto records = backup.committedRecords(&error);
+        QCOMPARE(records.size(), 1);
+        QVERIFY2(records.at(0).tag == QStringLiteral("fumigant"), qPrintable(records.at(0).tag));
+        const auto rectangles = backup.rectangles(records.at(0).id, &error);
+        QCOMPARE(rectangles.size(), 1);
+        QCOMPARE(rectangles.at(0).rotation, 45.0);
+    }
+
+    // Running the backup again overwrites the previous set without error.
+    store->resumeDraft();
+    store->setDraftDate(QStringLiteral("2026-04-03"));
+    store->setDraftTag(QStringLiteral("fumigant"));
+    store->addDraftRectangle(0.1, 0.1, 0.1, 0.1);
+    store->commitDraft();
+    QVERIFY2(store->errorMessage().isEmpty(), qPrintable(store->errorMessage()));
+    store->createBackup();
+    QVERIFY2(store->errorMessage().isEmpty(), qPrintable(store->errorMessage()));
+
+    // The backup folder is a complete, self-contained data folder.
+    auto restored = std::make_unique<AppStore>(nullptr, backupDb);
+    QVERIFY(restored->hasMap());
+    QCOMPARE(restored->mapImageUrl().toLocalFile(), backupImage);
+    QCOMPARE(restored->recordCount(), 2);
 }
 
 void TestAppStore::deletesCommittedRecordAndKeepsDraft()

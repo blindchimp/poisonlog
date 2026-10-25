@@ -22,6 +22,7 @@ int main(int argc, char *argv[])
 
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed, &app,
                      []() { QCoreApplication::exit(-1); }, Qt::QueuedConnection);
+    QObject::connect(&app, &QGuiApplication::aboutToQuit, &appStore, &AppStore::createBackup);
 
     engine.loadFromModule("PoisonLog", "Main");
     if (engine.rootObjects().isEmpty())

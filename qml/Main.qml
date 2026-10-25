@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Dialogs
 import QtQuick.Layouts
 import PoisonLog 1.0
 
@@ -76,6 +77,14 @@ ApplicationWindow {
                 enabled: App.draftHasContent
                 onClicked: clearDraftDialog.open()
             }
+
+            ToolButton {
+                text: "Settings"
+                ToolTip.visible: hovered
+                ToolTip.delay: 500
+                ToolTip.text: "Backup settings"
+                onClicked: settingsDialog.open()
+            }
         }
     }
 
@@ -138,6 +147,58 @@ ApplicationWindow {
             width: parent.width
             wrapMode: Text.WordWrap
             text: "All unfinished notes and rectangles will be deleted. Committed records will not be changed."
+        }
+    }
+
+    Dialog {
+        id: settingsDialog
+        anchors.centerIn: parent
+        modal: true
+        title: "Backup settings"
+        standardButtons: Dialog.Ok | Dialog.Cancel
+        width: 520
+
+        FolderDialog {
+            id: backupFolderDialog
+            title: "Choose the backup folder"
+            onAccepted: {
+                let path = selectedFolder.toString().replace(/^file:\/\//, "")
+                path = path.replace(/^\/([A-Za-z]:)/, "$1")
+                backupFolderField.text = decodeURIComponent(path)
+            }
+        }
+
+        onAccepted: App.backupFolder = backupFolderField.text
+
+        ColumnLayout {
+            width: parent.width
+            spacing: 8
+
+            Label {
+                text: "Backups are created every time the application is closed. " +
+                      "The folder will contain the database and the map image, " +
+                      "ready to be copied to another machine."
+                wrapMode: Text.WordWrap
+                Layout.fillWidth: true
+                color: "#53645a"
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 8
+
+                TextField {
+                    id: backupFolderField
+                    Layout.fillWidth: true
+                    text: App.backupFolder
+                    selectByMouse: true
+                }
+
+                Button {
+                    text: "Browse…"
+                    onClicked: backupFolderDialog.open()
+                }
+            }
         }
     }
 }

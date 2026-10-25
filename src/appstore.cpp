@@ -6,6 +6,7 @@
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
+#include <QSettings>
 #include <QStandardPaths>
 
 #include <algorithm>
@@ -55,6 +56,14 @@ AppStore::AppStore(QObject *parent, const QString &databasePath)
         path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)
             + QStringLiteral("/poisonlog.db");
     }
+    m_dataRoot = QFileInfo(path).absolutePath();
+
+    const QSettings settings;
+    m_backupFolder = settings
+        .value(QStringLiteral("backup/folder"),
+               QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)
+                   + QStringLiteral("/backups"))
+        .toString();
 
     m_database = new Database(path);
     QString error;
@@ -87,7 +96,7 @@ QUrl AppStore::mapImageUrl() const
 {
     if (!m_hasMap || m_map.imagePath.isEmpty())
         return {};
-    return QUrl::fromLocalFile(m_map.imagePath);
+    return QUrl::fromLocalFile(resolveMapImagePath(m_map.imagePath));
 }
 
 int AppStore::mapImageWidth() const
@@ -371,7 +380,9 @@ void AppStore::finishMapSetup(const QString &address, double latitude, double lo
     info.centerLat = latitude;
     info.centerLon = longitude;
     info.groundSpanMeters = groundSpanMeters > 0.0 ? groundSpanMeters : DefaultGroundSpanMeters;
-    info.imagePath = imagePath;
+    // Store the image path relative to the database directory when possible
+    // so the data folder stays portable between machines and users.
+    info.imagePath = relativeImagePath(imagePath);
     info.imageWidth = imageWidth;
     info.imageHeight = imageHeight;
     info.attribution = QString::fromUtf8(DefaultAttribution);
@@ -861,7 +872,54 @@ bool AppStore::loadMap()
 
     m_map = *info;
     m_hasMap = true;
+
+    // Self-heal databases that still store the image as an absolute path:
+    // rewrite it relative to the database directory whenever the image can
+    // be located in the standard layout (same install, or a restored one).
+    if (QFileInfo(m_map.imagePath).isAbsolute()) {
+        const QString relative = relativeImagePath(resolveMapImagePath(m_map.imagePath));
+        if (relative != m_map.imagePath) {
+            m_map.imagePath = relative;
+            persistMapImagePath();
+        }
+    }
     return true;
+}
+
+QString AppStore::resolveMapImagePath(const QString &stored) const
+{
+    if (stored.isEmpty())
+        return stored;
+
+    const QFileInfo info(stored);
+    if (info.isAbsolute()) {
+        if (info.exists())
+            return stored;
+        // Toleration for a restored data folder: the image is expected to
+        // live in the standard maps/ directory next to the database.
+        return QDir(m_dataRoot).filePath(QStringLiteral("maps/") + info.fileName());
+    }
+    return QDir(m_dataRoot).filePath(stored);
+}
+
+QString AppStore::relativeImagePath(const QString &resolved) const
+{
+    const QDir dataRoot(m_dataRoot);
+    if (!QFileInfo(resolved).isAbsolute())
+        return resolved;
+    const QString relative = dataRoot.relativeFilePath(resolved);
+    if (relative.startsWith(QStringLiteral("..")))
+        return resolved;
+    return relative;
+}
+
+void AppStore::persistMapImagePath()
+{
+    if (m_map.imagePath.isEmpty())
+        return;
+    QString error;
+    if (!m_database->saveMapImagePath(m_map.imagePath, &error))
+        setError(error);
 }
 
 bool AppStore::loadDraft(bool loadRectangles)
@@ -1038,6 +1096,79 @@ void AppStore::setError(const QString &message)
         return;
     m_errorMessage = message;
     emit errorMessageChanged();
+}
+
+QString AppStore::backupFolder() const
+{
+    return m_backupFolder;
+}
+
+void AppStore::setBackupFolder(const QString &folder)
+{
+    QString normalized = folder.trimmed();
+    if (normalized.isEmpty()) {
+        normalized = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)
+            + QStringLiteral("/backups");
+    }
+    if (m_backupFolder == normalized)
+        return;
+    m_backupFolder = normalized;
+    QSettings settings;
+    settings.setValue(QStringLiteral("backup/folder"), m_backupFolder);
+    emit backupFolderChanged();
+}
+
+void AppStore::createBackup()
+{
+    if (!m_hasMap) {
+        setStatus(QStringLiteral("Nothing to back up yet: the map has not been set up."));
+        return;
+    }
+
+    const QString folder = QDir(m_backupFolder).absolutePath();
+    if (!QDir().mkpath(folder)) {
+        setError(QStringLiteral("The backup folder could not be created: %1").arg(folder));
+        return;
+    }
+
+    const QString destination = QDir(folder).filePath(QStringLiteral("poisonlog.db"));
+    QFile::remove(destination);
+    QString error;
+    if (!m_database->backupTo(destination, &error)) {
+        setError(error);
+        return;
+    }
+
+    const QFileInfo image(resolveMapImagePath(m_map.imagePath));
+    const QString relative = relativeImagePath(image.absoluteFilePath());
+    const bool mirrored = QDir::isRelativePath(relative);
+    const QString imageDestination = mirrored
+        ? QDir(folder).filePath(relative)
+        : QDir(QDir(folder).filePath(QStringLiteral("maps"))).filePath(image.fileName());
+    if (!QDir().mkpath(QFileInfo(imageDestination).absolutePath())) {
+        setError(QStringLiteral("The backup map directory could not be created: %1")
+            .arg(QFileInfo(imageDestination).absolutePath()));
+        return;
+    }
+    QFile::remove(imageDestination);
+    if (!QFile::copy(image.absoluteFilePath(), imageDestination)) {
+        setError(QStringLiteral("The map image could not be backed up to: %1")
+            .arg(imageDestination));
+        return;
+    }
+
+    if (!mirrored) {
+        // Custom image outside the data folder: keep the backed-up database
+        // row pointing at the portable maps/ layout instead of a local path.
+        Database backupDatabase(destination);
+        if (backupDatabase.open(&error))
+            backupDatabase.saveMapImagePath(
+                relativeImagePath(imageDestination), &error);
+        if (!error.isEmpty())
+            setError(error);
+    }
+
+    setStatus(QStringLiteral("Backup created in %1.").arg(folder));
 }
 
 void AppStore::resetViewedRecord()

@@ -58,6 +58,8 @@ public:
 
     std::optional<MapInfo> map(QString *error = nullptr) const;
     bool saveMap(const MapInfo &info, QString *error);
+    bool saveMapImagePath(const QString &imagePath, QString *error);
+    bool backupTo(const QString &destinationFile, QString *error);
 
     std::optional<Record> draft(QString *error = nullptr) const;
     bool ensureDraft(QString *error);

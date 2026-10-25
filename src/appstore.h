@@ -52,6 +52,7 @@ class AppStore : public QObject
 
     Q_PROPERTY(QString statusMessage READ statusMessage NOTIFY statusMessageChanged)
     Q_PROPERTY(QString errorMessage READ errorMessage NOTIFY errorMessageChanged)
+    Q_PROPERTY(QString backupFolder READ backupFolder WRITE setBackupFolder NOTIFY backupFolderChanged)
 
     Q_PROPERTY(bool searching READ searching NOTIFY searchingChanged)
     Q_PROPERTY(QVariantList searchResults READ searchResults NOTIFY searchResultsChanged)
@@ -98,6 +99,7 @@ public:
 
     QString statusMessage() const;
     QString errorMessage() const;
+    QString backupFolder() const;
 
     bool searching() const;
     QVariantList searchResults() const;
@@ -106,6 +108,8 @@ public:
     void setDraftTag(const QString &tag);
     void setDraftNotes(const QString &notes);
     void setDraftColor(const QString &color);
+
+    void setBackupFolder(const QString &folder);
 
     void setEditDate(const QString &date);
     void setEditTag(const QString &tag);
@@ -140,6 +144,7 @@ public:
 
     Q_INVOKABLE void reportError(const QString &message);
     Q_INVOKABLE void clearMessages();
+    Q_INVOKABLE void createBackup();
 
 signals:
     void mapChanged();
@@ -162,6 +167,7 @@ signals:
     void currentRectangleColorChanged();
     void statusMessageChanged();
     void errorMessageChanged();
+    void backupFolderChanged();
     void searchingChanged();
     void searchResultsChanged();
 
@@ -175,14 +181,18 @@ private:
     void setMode(const QString &mode);
     void persistDraftFields();
     void persistDraftRectangles();
+    void persistMapImagePath();
     void setStatus(const QString &message);
     void setError(const QString &message);
     void resetViewedRecord();
     QVariantMap recordToMap(const Database::Record &record) const;
+    QString resolveMapImagePath(const QString &stored) const;
+    QString relativeImagePath(const QString &resolved) const;
     static QString today();
     static double clamp01(double value);
 
     Database *m_database = nullptr;
+    QString m_dataRoot;
     RecordListModel m_records;
     RectangleListModel m_rectangles;
     Geocoder m_geocoder;
@@ -211,6 +221,7 @@ private:
 
     QString m_statusMessage;
     QString m_errorMessage;
+    QString m_backupFolder;
 
     bool m_searching = false;
     QVariantList m_searchResults;
