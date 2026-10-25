@@ -22,6 +22,7 @@ private slots:
     void savesCommittedRecordEdits();
     void cancelsRecordEditWithoutPersisting();
     void rectangleColorsArePerRectangle();
+    void rectangleRotationRoundTrips();
     void deletesCommittedRecordAndKeepsDraft();
 
 private:
@@ -302,6 +303,45 @@ void TestAppStore::rectangleColorsArePerRectangle()
     QCOMPARE(reloaded->rectangles().at(0).color, QString::fromLatin1(Database::DefaultColor));
     QCOMPARE(reloaded->rectangles().at(1).color, QStringLiteral("#c62828"));
     QCOMPARE(reloaded->rectangles().at(2).color, QStringLiteral("#1565c0"));
+}
+
+void TestAppStore::rectangleRotationRoundTrips()
+{
+    auto store = std::make_unique<AppStore>(nullptr, m_databasePath);
+    createMap(*store);
+
+    store->setDraftDate(QStringLiteral("2026-04-02"));
+    store->setDraftTag(QStringLiteral("fungicide"));
+    store->addDraftRectangle(0.2, 0.2, 0.2, 0.1);
+
+    auto *rects = qobject_cast<RectangleListModel *>(store->rectanglesModel());
+    Q_CHECK_PTR(rects);
+    QCOMPARE(rects->rectangles().at(0).rotation, 0.0);
+
+    store->updateDraftRectangleRotation(0, 337.5, false);
+    QCOMPARE(rects->rectangles().at(0).rotation, 337.5);
+
+    store->updateDraftRectangleRotation(0, -90.0, false);
+    QCOMPARE(rects->rectangles().at(0).rotation, 270.0);
+
+    store->updateDraftRectangleRotation(0, 725.0, false);
+    QCOMPARE(rects->rectangles().at(0).rotation, 5.0);
+
+    store->updateDraftRectangleRotation(0, 24.0, true);
+    QVERIFY2(store->errorMessage().isEmpty(), qPrintable(store->errorMessage()));
+
+    // Rotation survives an app restart and a commit.
+    store->commitDraft();
+    QVERIFY2(store->errorMessage().isEmpty(), qPrintable(store->errorMessage()));
+    const int recordId = store->viewedRecordId();
+
+    store.reset();
+    store = std::make_unique<AppStore>(nullptr, m_databasePath);
+    store->selectRecord(recordId);
+
+    auto *reloaded = qobject_cast<RectangleListModel *>(store->rectanglesModel());
+    Q_CHECK_PTR(reloaded);
+    QCOMPARE(reloaded->rectangles().at(0).rotation, 24.0);
 }
 
 void TestAppStore::deletesCommittedRecordAndKeepsDraft()

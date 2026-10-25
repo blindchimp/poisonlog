@@ -10,6 +10,10 @@ Item {
         return Math.max(minimum, Math.min(maximum, value))
     }
 
+    function normalizeDelta(value) {
+        return value - 360 * Math.round(value / 360)
+    }
+
     Rectangle {
         anchors.fill: parent
         radius: 8
@@ -100,6 +104,7 @@ Item {
             required property real ry
             required property real rw
             required property real rh
+            required property real rRotation
             required property string rColor
 
             x: rx * root.width
@@ -111,6 +116,11 @@ Item {
             border.width: App.selectedRectangleIndex === index ? 3 : 2
             border.color: rColor
             radius: 1
+            transform: Rotation {
+                origin.x: rectItem.width / 2
+                origin.y: rectItem.height / 2
+                angle: rectItem.rRotation
+            }
 
             Rectangle {
                 anchors.fill: parent
@@ -194,6 +204,53 @@ Item {
                         const nh = root.clamp(origH + (point.y - pressY) / root.height,
                                               0.01, 1 - rectItem.ry)
                         App.updateDraftRectangle(index, rectItem.rx, rectItem.ry, nw, nh, false)
+                    }
+
+                    onReleased: App.saveDraftRectangles()
+                }
+            }
+
+            Rectangle {
+                id: rotationHandle
+                width: 14
+                height: 14
+                radius: 7
+                x: -24
+                y: parent.height + 10
+                visible: App.mode === "draft" || App.mode === "record-edit"
+                color: rectItem.rColor
+                border.color: "#ffffff"
+                border.width: 2
+
+                MouseArea {
+                    anchors.fill: parent
+                    anchors.margins: -5
+                    enabled: App.mode === "draft" || App.mode === "record-edit"
+                    cursorShape: Qt.CrossCursor
+
+                    property real centerX: 0
+                    property real centerY: 0
+                    property real prevAngle: 0
+                    property real currentRotation: 0
+
+                    onPressed: (mouse) => {
+                        App.selectRectangle(index)
+                        const point = mapToItem(root, mouse.x, mouse.y)
+                        centerX = rectItem.rx * root.width + rectItem.width / 2
+                        centerY = rectItem.ry * root.height + rectItem.height / 2
+                        prevAngle = Math.atan2(point.y - centerY, point.x - centerX)
+                        currentRotation = rectItem.rRotation
+                    }
+
+                    onPositionChanged: (mouse) => {
+                        if (!pressed)
+                            return
+                        const point = mapToItem(root, mouse.x, mouse.y)
+                        const angle = Math.atan2(point.y - centerY, point.x - centerX)
+                        const delta = root.normalizeDelta((angle - prevAngle) * 180 / Math.PI)
+                        prevAngle = angle
+                        currentRotation += delta
+                        App.updateDraftRectangleRotation(index, currentRotation, false)
                     }
 
                     onReleased: App.saveDraftRectangles()

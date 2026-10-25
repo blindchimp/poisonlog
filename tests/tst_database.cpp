@@ -99,6 +99,7 @@ void TestDatabase::createsSchemaAndDraft()
     rect.y = 0.2;
     rect.w = 0.3;
     rect.h = 0.4;
+    rect.rotation = 45.0;
     QVERIFY2(m_db->replaceRectangles(draft->id, { rect }, &error), qPrintable(error));
 
     const auto reloaded = m_db->draft(&error);
@@ -110,6 +111,7 @@ void TestDatabase::createsSchemaAndDraft()
     const auto rectangles = m_db->rectangles(draft->id, &error);
     QCOMPARE(rectangles.size(), 1);
     QCOMPARE(rectangles.first().w, 0.3);
+    QCOMPARE(rectangles.first().rotation, 45.0);
 }
 
 void TestDatabase::commitsDraftAndOrdersRecords()
@@ -220,12 +222,14 @@ void TestDatabase::updatesCommittedRecord()
     r1.y = 0.0;
     r1.w = 0.1;
     r1.h = 0.1;
+    r1.rotation = 45.0;
     r1.color = QStringLiteral("#2e7d32");
     Database::Rect r2;
     r2.x = 0.8;
     r2.y = 0.8;
     r2.w = 0.15;
     r2.h = 0.15;
+    r2.rotation = 300.0;
     r2.color = QStringLiteral("#f9a825");
     QVERIFY2(m_db->updateRecord(committedId, newFields, { r1, r2 }, &error), qPrintable(error));
 
@@ -240,9 +244,11 @@ void TestDatabase::updatesCommittedRecord()
     QCOMPARE(rectangles.size(), 2);
     QCOMPARE(rectangles.at(0).x, r1.x);
     QCOMPARE(rectangles.at(0).w, r1.w);
+    QCOMPARE(rectangles.at(0).rotation, 45.0);
     QCOMPARE(rectangles.at(0).color, QStringLiteral("#2e7d32"));
     QCOMPARE(rectangles.at(1).x, r2.x);
     QCOMPARE(rectangles.at(1).w, r2.w);
+    QCOMPARE(rectangles.at(1).rotation, 300.0);
     QCOMPARE(rectangles.at(1).color, QStringLiteral("#f9a825"));
 
     // Updating a draft record is not allowed.
@@ -331,6 +337,17 @@ void TestDatabase::migratesLegacyRectangles()
     const auto rectangles = m_db->rectangles(1, &error);
     QCOMPARE(rectangles.size(), 1);
     QCOMPARE(rectangles.first().color, QStringLiteral("#1565c0"));
+    QCOMPARE(rectangles.first().rotation, 0.0);
+
+    // New rectangles round-trip the rotation column added by the migration.
+    Database::Rect rect;
+    rect.w = 0.1;
+    rect.h = 0.1;
+    rect.rotation = 90.0;
+    QVERIFY2(m_db->replaceRectangles(1, { rect }, &error), qPrintable(error));
+    const auto migrated = m_db->rectangles(1, &error);
+    QCOMPARE(migrated.size(), 1);
+    QCOMPARE(migrated.first().rotation, 90.0);
 }
 
 void TestDatabase::deletesCommittedRecord()

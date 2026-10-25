@@ -132,6 +132,7 @@ public:
     Q_INVOKABLE void addDraftRectangle(double x, double y, double width, double height);
     Q_INVOKABLE void updateDraftRectangle(int index, double x, double y, double width,
                                           double height, bool persist);
+    Q_INVOKABLE void updateDraftRectangleRotation(int index, double degrees, bool persist);
     Q_INVOKABLE void saveDraftRectangles();
     Q_INVOKABLE void removeDraftRectangle(int index);
     Q_INVOKABLE void deleteSelectedRectangle();

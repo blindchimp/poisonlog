@@ -8,6 +8,7 @@ struct MapRectangle {
     double y = 0.0;
     double w = 0.0;
     double h = 0.0;
+    double rotation = 0.0;
     QString color;
 };
 
@@ -22,6 +23,7 @@ public:
         YRole,
         WRole,
         HRole,
+        RotationRole,
         ColorRole,
     };
 

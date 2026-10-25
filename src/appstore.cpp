@@ -9,6 +9,7 @@
 #include <QStandardPaths>
 
 #include <algorithm>
+#include <cmath>
 
 namespace {
 
@@ -582,6 +583,7 @@ void AppStore::saveRecordEdit()
         rect.y = item.y;
         rect.w = item.w;
         rect.h = item.h;
+        rect.rotation = item.rotation;
         rect.color = item.color;
         stored.append(rect);
     }
@@ -729,6 +731,24 @@ void AppStore::updateDraftRectangle(int index, double x, double y, double width,
     rect.y = y;
     rect.w = width;
     rect.h = height;
+    m_rectangles.setRectangle(index, rect);
+    if (persist && m_mode == QStringLiteral("draft"))
+        persistDraftRectangles();
+}
+
+void AppStore::updateDraftRectangleRotation(int index, double degrees, bool persist)
+{
+    if (m_mode != QStringLiteral("draft") && !editingRecord())
+        return;
+    if (index < 0 || index >= m_rectangles.count())
+        return;
+
+    degrees = std::fmod(degrees, 360.0);
+    if (degrees < 0.0)
+        degrees += 360.0;
+
+    MapRectangle rect = m_rectangles.rectangles().at(index);
+    rect.rotation = degrees;
     m_rectangles.setRectangle(index, rect);
     if (persist && m_mode == QStringLiteral("draft"))
         persistDraftRectangles();
@@ -896,6 +916,7 @@ void AppStore::loadDraftRectangles()
         item.y = rect.y;
         item.w = rect.w;
         item.h = rect.h;
+        item.rotation = rect.rotation;
         item.color = rect.color.isEmpty() ? m_draftColor : rect.color;
         rectangles.append(item);
     }
@@ -926,6 +947,7 @@ void AppStore::loadRecordRectangles(int recordId)
         item.y = rect.y;
         item.w = rect.w;
         item.h = rect.h;
+        item.rotation = rect.rotation;
         item.color = rect.color.isEmpty()
             ? (fallbackColor.isEmpty() ? QString::fromLatin1(Database::DefaultColor)
                                        : fallbackColor)
@@ -992,6 +1014,7 @@ void AppStore::persistDraftRectangles()
         rect.y = item.y;
         rect.w = item.w;
         rect.h = item.h;
+        rect.rotation = item.rotation;
         rect.color = item.color;
         stored.append(rect);
     }

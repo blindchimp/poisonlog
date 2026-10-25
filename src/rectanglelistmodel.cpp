@@ -25,6 +25,8 @@ QVariant RectangleListModel::data(const QModelIndex &index, int role) const
         return rect.w;
     case HRole:
         return rect.h;
+    case RotationRole:
+        return rect.rotation;
     case ColorRole:
         return rect.color;
     default:
@@ -39,6 +41,7 @@ QHash<int, QByteArray> RectangleListModel::roleNames() const
         { YRole, "ry" },
         { WRole, "rw" },
         { HRole, "rh" },
+        { RotationRole, "rRotation" },
         { ColorRole, "rColor" },
     };
 }
@@ -75,7 +78,7 @@ void RectangleListModel::setRectangle(int index, const MapRectangle &rect)
         return;
     m_rectangles[index] = rect;
     const QModelIndex modelIndex = this->index(index, 0);
-    emit dataChanged(modelIndex, modelIndex, { XRole, YRole, WRole, HRole, ColorRole });
+    emit dataChanged(modelIndex, modelIndex, { XRole, YRole, WRole, HRole, RotationRole, ColorRole });
 }
 
 void RectangleListModel::removeRectangle(int index)

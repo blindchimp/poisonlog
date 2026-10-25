@@ -126,6 +126,7 @@ bool Database::ensureSchema(QString *error)
             " y REAL NOT NULL,"
             " w REAL NOT NULL,"
             " h REAL NOT NULL,"
+            " rotation REAL NOT NULL DEFAULT 0.0,"
             " sort INTEGER NOT NULL,"
             " color TEXT NOT NULL DEFAULT ''"
             ")"),
@@ -197,8 +198,34 @@ bool Database::ensureSchema(QString *error)
         }
     }
 
+    if (version < 3) {
+        bool hasRotationColumn = false;
+        {
+            QSqlQuery info(*m_db);
+            if (info.exec(QStringLiteral("PRAGMA table_info(rectangles)"))) {
+                while (info.next()) {
+                    if (info.value(1).toString() == QStringLiteral("rotation")) {
+                        hasRotationColumn = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (!hasRotationColumn) {
+            QSqlQuery migrate(*m_db);
+            if (!migrate.exec(QStringLiteral(
+                    "ALTER TABLE rectangles ADD COLUMN rotation REAL NOT NULL DEFAULT 0.0"))) {
+                failQuery(migrate, error,
+                          QStringLiteral("Could not upgrade the database schema"));
+                m_db->rollback();
+                return false;
+            }
+        }
+    }
+
     QSqlQuery versionQuery(*m_db);
-    if (!versionQuery.exec(QStringLiteral("PRAGMA user_version = 2"))) {
+    if (!versionQuery.exec(QStringLiteral("PRAGMA user_version = 3"))) {
         failQuery(versionQuery, error, QStringLiteral("Could not set the schema version"));
         m_db->rollback();
         return false;
@@ -436,7 +463,7 @@ QVector<Database::Rect> Database::rectangles(int recordId, QString *error) const
 
     QSqlQuery query(*m_db);
     query.prepare(QStringLiteral(
-        "SELECT x, y, w, h, sort, color FROM rectangles"
+        "SELECT x, y, w, h, rotation, sort, color FROM rectangles"
         " WHERE record_id = ? ORDER BY sort, id"));
     query.addBindValue(recordId);
     if (!query.exec()) {
@@ -450,8 +477,9 @@ QVector<Database::Rect> Database::rectangles(int recordId, QString *error) const
         rect.y = query.value(1).toDouble();
         rect.w = query.value(2).toDouble();
         rect.h = query.value(3).toDouble();
-        rect.sort = query.value(4).toInt();
-        rect.color = query.value(5).toString();
+        rect.rotation = query.value(4).toDouble();
+        rect.sort = query.value(5).toInt();
+        rect.color = query.value(6).toString();
         rectangles.append(rect);
     }
     return rectangles;
@@ -480,8 +508,8 @@ bool Database::replaceRectangles(int recordId, const QVector<Rect> &rectangles, 
 
     QSqlQuery insert(*m_db);
     insert.prepare(QStringLiteral(
-        "INSERT INTO rectangles (record_id, x, y, w, h, sort, color)"
-        " VALUES (?, ?, ?, ?, ?, ?, ?)"));
+        "INSERT INTO rectangles (record_id, x, y, w, h, rotation, sort, color)"
+        " VALUES (?, ?, ?, ?, ?, ?, ?, ?)"));
     for (int i = 0; i < rectangles.size(); ++i) {
         const Rect &rect = rectangles.at(i);
         insert.addBindValue(recordId);
@@ -489,6 +517,7 @@ bool Database::replaceRectangles(int recordId, const QVector<Rect> &rectangles, 
         insert.addBindValue(rect.y);
         insert.addBindValue(rect.w);
         insert.addBindValue(rect.h);
+        insert.addBindValue(rect.rotation);
         insert.addBindValue(i);
         insert.addBindValue(nonNull(rect.color));
         if (!insert.exec()) {
@@ -610,8 +639,8 @@ bool Database::updateRecord(int recordId, const Record &fields,
 
     QSqlQuery insert(*m_db);
     insert.prepare(QStringLiteral(
-        "INSERT INTO rectangles (record_id, x, y, w, h, sort, color)"
-        " VALUES (?, ?, ?, ?, ?, ?, ?)"));
+        "INSERT INTO rectangles (record_id, x, y, w, h, rotation, sort, color)"
+        " VALUES (?, ?, ?, ?, ?, ?, ?, ?)"));
     for (int i = 0; i < rectangles.size(); ++i) {
         const Rect &rect = rectangles.at(i);
         insert.addBindValue(recordId);
@@ -619,6 +648,7 @@ bool Database::updateRecord(int recordId, const Record &fields,
         insert.addBindValue(rect.y);
         insert.addBindValue(rect.w);
         insert.addBindValue(rect.h);
+        insert.addBindValue(rect.rotation);
         insert.addBindValue(i);
         insert.addBindValue(nonNull(rect.color));
         if (!insert.exec()) {
