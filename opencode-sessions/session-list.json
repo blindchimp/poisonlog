@@ -1,0 +1,58 @@
+[
+  {
+    "id": "ses_e8af86395ffepCd8rTof3WEece",
+    "title": "Add copyright notice to source files",
+    "updated": 1792964815562,
+    "created": 1792964795498,
+    "projectId": "a2162ae28527412cc135f68382b824866e0bca34",
+    "directory": "/home/dwight/git/poisonlog"
+  },
+  {
+    "id": "ses_e8b17a947ffeibSgIqqRZ408C2",
+    "title": "Build and package Poisonlog AppImage for Linux",
+    "updated": 1792963838080,
+    "created": 1792962746040,
+    "projectId": "a2162ae28527412cc135f68382b824866e0bca34",
+    "directory": "/home/dwight/git/poisonlog"
+  },
+  {
+    "id": "ses_e8b5c67c9ffez86FbueClwVi4b",
+    "title": "Freehand rectangle rotation with corner handle",
+    "updated": 1792962177976,
+    "created": 1792958240822,
+    "projectId": "a2162ae28527412cc135f68382b824866e0bca34",
+    "directory": "/home/dwight/git/poisonlog"
+  },
+  {
+    "id": "ses_e9fa10096ffeQJ7o0CzXFI7OyR",
+    "title": "Enable editing selected record and rename action",
+    "updated": 1792620668073,
+    "created": 1792618200937,
+    "projectId": "a2162ae28527412cc135f68382b824866e0bca34",
+    "directory": "/home/dwight/git/poisonlog"
+  },
+  {
+    "id": "ses_ea4f573acffeG4MY5YLmh5wWKl",
+    "title": "README.md with date and vibe coded note",
+    "updated": 1792528795225,
+    "created": 1792528780371,
+    "projectId": "a2162ae28527412cc135f68382b824866e0bca34",
+    "directory": "/home/dwight/git/poisonlog"
+  },
+  {
+    "id": "ses_ea616ecefffe925XpaKFJPkFqe",
+    "title": "APP.txt plan for implementation",
+    "updated": 1792527337659,
+    "created": 1792509809424,
+    "projectId": "a2162ae28527412cc135f68382b824866e0bca34",
+    "directory": "/home/dwight/git/poisonlog"
+  },
+  {
+    "id": "ses_ea61a0b52fferOQxyyLAV50L9O",
+    "title": "APP.txt implementation plan sketch",
+    "updated": 1792509647216,
+    "created": 1792509605037,
+    "projectId": "a2162ae28527412cc135f68382b824866e0bca34",
+    "directory": "/home/dwight/git/poisonlog"
+  }
+]

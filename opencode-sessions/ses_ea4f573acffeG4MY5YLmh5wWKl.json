@@ -1,0 +1,513 @@
+{
+  "info": {
+    "id": "ses_ea4f573acffeG4MY5YLmh5wWKl",
+    "slug": "kind-forest",
+    "projectID": "a2162ae28527412cc135f68382b824866e0bca34",
+    "directory": "/home/dwight/git/poisonlog",
+    "path": "",
+    "title": "README.md with date and vibe coded note",
+    "agent": "build",
+    "model": {
+      "id": "big-pickle",
+      "providerID": "opencode"
+    },
+    "version": "1.19.0",
+    "summary": {
+      "additions": 0,
+      "deletions": 0,
+      "files": 0
+    },
+    "cost": 0,
+    "tokens": {
+      "input": 12334,
+      "output": 647,
+      "reasoning": 7,
+      "cache": {
+        "read": 37504,
+        "write": 0
+      }
+    },
+    "time": {
+      "created": 1792528780371,
+      "updated": 1792528795225
+    }
+  },
+  "messages": [
+    {
+      "info": {
+        "role": "user",
+        "time": {
+          "created": 1792528780388
+        },
+        "agent": "build",
+        "model": {
+          "providerID": "opencode",
+          "modelID": "big-pickle"
+        },
+        "summary": {
+          "diffs": [
+            {
+              "file": "README.md",
+              "patch": "Index: README.md\n===================================================================\n--- README.md\t\n+++ README.md\t\n@@ -0,0 +1,47 @@\n+# PoisonLog\n+\n+Date: 2026-10-20\n+\n+**Vibe coded** — this project was built largely by AI-assisted, stream-of-consciousness coding.\n+\n+A Qt 6 / QML desktop application for recording where herbicides and pesticides are applied on a piece of land.\n+\n+## Overview\n+\n+- Set up a map by entering an address; the app geocodes it and captures a top-down map view (roughly one acre around the main structure).\n+- Draw one or more rectangles on the saved map to mark treated areas.\n+- Attach notes, a date, a tag name, and a color to the marked areas.\n+- Commit records to a local SQLite database.\n+- Browse committed records in a side list sorted newest to oldest; selecting one displays its rectangles and notes.\n+- Partially entered work is preserved across record selection and application restarts, with options to resume or discard it.\n+\n+## Requirements\n+\n+- CMake 3.25+\n+- Qt 6.12 (Core, Gui, Qml, Quick, QuickControls2, Sql, Network, Test)\n+- A C++20 compiler\n+\n+## Build\n+\n+```sh\n+cmake -S . -B build\n+cmake --build build\n+```\n+\n+## Run\n+\n+```sh\n+./build/poisonlog\n+```\n+\n+## Tests\n+\n+```sh\n+cd build && ctest\n+```\n+\n+## Project Layout\n+\n+- `src/` — C++ backend (database, models, geocoder, tile provider, app state)\n+- `qml/` — QML UI (map setup, map canvas, record list, editor panel)\n+- `tests/` — Qt Test suites for the database and app store\n",
+              "additions": 47,
+              "deletions": 0,
+              "status": "added"
+            }
+          ]
+        },
+        "id": "msg_15b0a8c64001D43wdHwbVHvejQ",
+        "sessionID": "ses_ea4f573acffeG4MY5YLmh5wWKl"
+      },
+      "parts": [
+        {
+          "type": "text",
+          "text": "Generate a brief readme.md file for this repo. be sure to put date, and the fact that it was \"vibe coded\" near the top.",
+          "id": "prt_15b0a8c67001KhqU4bVz2gCP97",
+          "sessionID": "ses_ea4f573acffeG4MY5YLmh5wWKl",
+          "messageID": "msg_15b0a8c64001D43wdHwbVHvejQ"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_15b0a8c64001D43wdHwbVHvejQ",
+        "role": "assistant",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/home/dwight/git/poisonlog",
+          "root": "/home/dwight/git/poisonlog"
+        },
+        "cost": 0,
+        "tokens": {
+          "total": 8452,
+          "input": 6577,
+          "output": 76,
+          "reasoning": 7,
+          "cache": {
+            "write": 0,
+            "read": 1792
+          }
+        },
+        "modelID": "big-pickle",
+        "providerID": "opencode",
+        "time": {
+          "created": 1792528780408,
+          "completed": 1792528783877
+        },
+        "finish": "tool-calls",
+        "id": "msg_15b0a8c7800132I29B1h0O7TcF",
+        "sessionID": "ses_ea4f573acffeG4MY5YLmh5wWKl"
+      },
+      "parts": [
+        {
+          "snapshot": "9b179c9e601d1a61711406b7b0c82a592dcd2b94",
+          "type": "step-start",
+          "id": "prt_15b0a97f0001q2jSoU41TnEsEt",
+          "sessionID": "ses_ea4f573acffeG4MY5YLmh5wWKl",
+          "messageID": "msg_15b0a8c7800132I29B1h0O7TcF"
+        },
+        {
+          "type": "reasoning",
+          "text": "Let me explore the repo first.",
+          "time": {
+            "start": 1792528783346,
+            "end": 1792528783748
+          },
+          "id": "prt_15b0a97f20011gWGBca6WLMn6E",
+          "sessionID": "ses_ea4f573acffeG4MY5YLmh5wWKl",
+          "messageID": "msg_15b0a8c7800132I29B1h0O7TcF"
+        },
+        {
+          "type": "tool",
+          "tool": "bash",
+          "callID": "call_4b42219547a44e70927f6cc5",
+          "state": {
+            "status": "completed",
+            "input": {
+              "command": "ls -la && git log --oneline -5"
+            },
+            "output": "total 76\ndrwxrwxr-x  7 dwight dwight  4096 Oct 20 13:16 .\ndrwxrwxr-x 34 dwight dwight  4096 Oct 20 08:14 ..\n-rw-rw-r--  1 dwight dwight    84 Oct 20 08:17 AGENTS.md\n-rw-rw-r--  1 dwight dwight  1565 Oct 20 08:18 APP.txt\ndrwxrwxr-x 14 dwight dwight  4096 Oct 20 12:55 build\n-rw-rw-r--  1 dwight dwight  1606 Oct 20 08:43 CMakeLists.txt\n-rw-rw-r--  1 dwight dwight 28775 Oct 20 13:16 CMakeLists.txt.user\ndrwxrwxr-x  8 dwight dwight  4096 Oct 20 13:37 .git\n-rw-rw-r--  1 dwight dwight    34 Oct 20 08:43 .gitignore\ndrwxrwxr-x  2 dwight dwight  4096 Oct 20 08:44 qml\ndrwxrwxr-x  2 dwight dwight  4096 Oct 20 08:33 src\ndrwxrwxr-x  2 dwight dwight  4096 Oct 20 08:34 tests\n70780ff first cut, vibe coded\nb457236 Add empty AGENTS.md\n",
+            "metadata": {
+              "output": "total 76\ndrwxrwxr-x  7 dwight dwight  4096 Oct 20 13:16 .\ndrwxrwxr-x 34 dwight dwight  4096 Oct 20 08:14 ..\n-rw-rw-r--  1 dwight dwight    84 Oct 20 08:17 AGENTS.md\n-rw-rw-r--  1 dwight dwight  1565 Oct 20 08:18 APP.txt\ndrwxrwxr-x 14 dwight dwight  4096 Oct 20 12:55 build\n-rw-rw-r--  1 dwight dwight  1606 Oct 20 08:43 CMakeLists.txt\n-rw-rw-r--  1 dwight dwight 28775 Oct 20 13:16 CMakeLists.txt.user\ndrwxrwxr-x  8 dwight dwight  4096 Oct 20 13:37 .git\n-rw-rw-r--  1 dwight dwight    34 Oct 20 08:43 .gitignore\ndrwxrwxr-x  2 dwight dwight  4096 Oct 20 08:44 qml\ndrwxrwxr-x  2 dwight dwight  4096 Oct 20 08:33 src\ndrwxrwxr-x  2 dwight dwight  4096 Oct 20 08:34 tests\n70780ff first cut, vibe coded\nb457236 Add empty AGENTS.md\n",
+              "exit": 0,
+              "truncated": false
+            },
+            "title": "ls -la && git log --oneline -5",
+            "time": {
+              "start": 1792528783759,
+              "end": 1792528783832
+            }
+          },
+          "id": "prt_15b0a9987001IsnI2cQLukS358",
+          "sessionID": "ses_ea4f573acffeG4MY5YLmh5wWKl",
+          "messageID": "msg_15b0a8c7800132I29B1h0O7TcF"
+        },
+        {
+          "type": "tool",
+          "tool": "glob",
+          "callID": "call_802fe51a4a014093aa541574",
+          "state": {
+            "status": "completed",
+            "input": {
+              "pattern": "**/*"
+            },
+            "output": "/home/dwight/git/poisonlog/tests/tst_database.cpp\n/home/dwight/git/poisonlog/tests/tst_appstore.cpp\n/home/dwight/git/poisonlog/src/geocoder.h\n/home/dwight/git/poisonlog/src/recordlistmodel.h\n/home/dwight/git/poisonlog/src/recordlistmodel.cpp\n/home/dwight/git/poisonlog/src/tileimageprovider.h\n/home/dwight/git/poisonlog/src/database.h\n/home/dwight/git/poisonlog/src/appstore.cpp\n/home/dwight/git/poisonlog/src/rectanglelistmodel.h\n/home/dwight/git/poisonlog/src/geocoder.cpp\n/home/dwight/git/poisonlog/src/main.cpp\n/home/dwight/git/poisonlog/src/database.cpp\n/home/dwight/git/poisonlog/src/rectanglelistmodel.cpp\n/home/dwight/git/poisonlog/src/appstore.h\n/home/dwight/git/poisonlog/src/tileimageprovider.cpp\n/home/dwight/git/poisonlog/CMakeLists.txt.user\n/home/dwight/git/poisonlog/build/poisonlog\n/home/dwight/git/poisonlog/build/.ninja_log\n/home/dwight/git/poisonlog/build/qmltypes/poisonlog_foreign_types.txt\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/poisonlog\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/.ninja_log\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/qmltypes/poisonlog_foreign_types.txt\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/meta_types/poisonlog_json_file_list.txt\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/meta_types/qt6poisonlog_metatypes.json\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/meta_types/poisonlog_json_file_list.txt.timestamp\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/meta_types/qt6poisonlog_core_metatypes.json.gen\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/meta_types/poisonlog_core_json_file_list.txt\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/meta_types/qt6poisonlog_core_metatypes.json\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/meta_types/qt6poisonlog_metatypes.json.gen\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/meta_types/poisonlog_core_json_file_list.txt.timestamp\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/cmake_install.cmake\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/tst_database\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/.cmake/api/v1/query/codemodel-v2\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/.cmake/api/v1/query/cache-v2\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/.cmake/api/v1/query/cmakeFiles-v1\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/.cmake/api/v1/reply/target-all_qmllint_module-Debug-9ae8abe16e6d67d8f23c.json\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/.cmake/api/v1/reply/target-all_qmllint-Debug-a92b17bcfdc43c98e083.json\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/.cmake/api/v1/reply/target-poisonlog_core_autogen-Debug-3448dc0a23c23840f59d.json\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/.cmake/api/v1/reply/index-2026-10-20T15-46-40-0351.json\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/.cmake/api/v1/reply/target-poisonlog_qmlimportscan-Debug-529bd1500d9143b14aeb.json\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/.cmake/api/v1/reply/target-tst_appstore_autogen-Debug-081cac88c357fb9d4513.json\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/.cmake/api/v1/reply/target-tst_appstore_autogen_timestamp_deps-Debug-6172ce6792820dfa2813.json\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/.cmake/api/v1/reply/target-dump_qml_context_properties-Debug-9d659910ff0e74fb2202.json\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/.cmake/api/v1/reply/target-tst_appstore-Debug-68f54af5c598f3f3646c.json\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/.cmake/api/v1/reply/cmakeFiles-v1-9e3668e93996bd15af68.json\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/.cmake/api/v1/reply/target-generate_qmlls_build_ini_file-Debug-754ac5dca91e549839d6.json\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/.cmake/api/v1/reply/target-poisonlog_autogen-Debug-9ed0db76276ff0b40dc4.json\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/.cmake/api/v1/reply/target-poisonlog_qmllint_json-Debug-69b7abb14b3b9eafb0b7.json\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/.cmake/api/v1/reply/target-poisonlog_copy_qml-Debug-7320a816bd1d467cbe13.json\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/.cmake/api/v1/reply/target-poisonlog_qmltyperegistration-Debug-818d4ada652cb06eed11.json\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/.cmake/api/v1/reply/target-poisonlog_qmllint-Debug-dc75684f175314fe965a.json\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/.cmake/api/v1/reply/target-poisonlog_copy_res-Debug-2898ed5e22294db484a6.json\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/.cmake/api/v1/reply/target-poisonlog_qmllint_module-Debug-7c589857062c8733a267.json\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/.cmake/api/v1/reply/cache-v2-c6786040a207fa5ed0c9.json\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/.cmake/api/v1/reply/target-clean_qml_context_properties-Debug-b38ec12f656f898c56ff.json\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/.cmake/api/v1/reply/codemodel-v2-5695c51edff8091e9d62.json\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/.cmake/api/v1/reply/target-poisonlog_core-Debug-93faa5d5e5cbcb6daa7d.json\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/.cmake/api/v1/reply/target-poisonlog_autogen_timestamp_deps-Debug-da46ce514c7ac0fb1753.json\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/.cmake/api/v1/reply/target-tst_database_autogen_timestamp_deps-Debug-2fac9ee604e3b3977afb.json\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/.cmake/api/v1/reply/target-module_poisonlog_aotstats_target-Debug-35b2d5f03bb60b169fc2.json\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/.cmake/api/v1/reply/target-all_qmllint_json-Debug-fde9c492364b04c185a5.json\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/.cmake/api/v1/reply/target-tst_database-Debug-4dad7d399c2ffa953e0d.json\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/.cmake/api/v1/reply/directory-.-Debug-f5ebdc15457944623624.json\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/.cmake/api/v1/reply/target-all_qmltyperegistrations-Debug-595aba02d400bdd5529c.json\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/.cmake/api/v1/reply/target-tst_database_qmlimportscan-Debug-baba903d60ac7950f5b7.json\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/.cmake/api/v1/reply/target-all_aotstats-Debug-29b40de013088c9987ec.json\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/.cmake/api/v1/reply/target-tst_appstore_qmlimportscan-Debug-afa170d4bda4570fb1a2.json\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/.cmake/api/v1/reply/target-poisonlog_qmlpreview-Debug-993b9764336f6d3dcf6f.json\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/.cmake/api/v1/reply/target-tst_database_autogen-Debug-6c08685dcf1b9acfbac8.json\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/.cmake/api/v1/reply/target-poisonlog_core_autogen_timestamp_deps-Debug-21bd756af9a4b1da433e.json\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/.cmake/api/v1/reply/target-poisonlog-Debug-2b020d33cd1434c8eb13.json\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/.cmake/api/v1/reply/target-generate_finalqtconf_poisonlog-Debug-a73f4ffa55533763d3ae.json\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/tst_appstore\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/qt.conf\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/poisonlog_qmltyperegistrations.cpp\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/tst_appstore_autogen/mocs_compilation.cpp\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/tst_appstore_autogen/moc_predefs.h\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/tst_appstore_autogen/timestamp\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/tst_appstore_autogen/deps\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/tst_appstore_autogen/include/tst_appstore.moc\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/tst_appstore_autogen/include/tst_appstore.moc.d\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/tst_database_autogen/include/tst_database.moc\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/tst_database_autogen/include/tst_database.moc.d\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/tst_database_autogen/mocs_compilation.cpp\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/tst_database_autogen/moc_predefs.h\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/tst_database_autogen/timestamp\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/tst_database_autogen/deps\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/.qtc/package-manager/conan_provider.cmake\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/.qtc/package-manager/auto-setup.cmake\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/.qtc/package-manager/conan.cmake\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/.qtc/package-manager/LICENSE.conan\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/CMakeFiles/rules.ninja\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/CMakeFiles/cmake.check_cache\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/.qtc/package-manager/maintenance_tool_provider.cmake\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/.qtc/package-manager/maintenance_tool_provider.qs\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/Testing/Temporary/LastTest.log\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/poisonlog_core_autogen/deps\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/CMakeFiles/CMakeConfigureLog.yaml\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/poisonlog_core_autogen/timestamp\n/home/dwight/git/poisonlog/build/Desktop_Qt_6_12_0-Debug/poisonlog_core_autogen/moc_predefs.h\n\n(Results are truncated: showing first 100 results. Consider using a more specific path or pattern.)",
+            "metadata": {
+              "count": 100,
+              "truncated": true
+            },
+            "title": "",
+            "time": {
+              "start": 1792528783770,
+              "end": 1792528783815
+            }
+          },
+          "id": "prt_15b0a9992001Y23AP5Yt4unKyK",
+          "sessionID": "ses_ea4f573acffeG4MY5YLmh5wWKl",
+          "messageID": "msg_15b0a8c7800132I29B1h0O7TcF"
+        },
+        {
+          "reason": "tool-calls",
+          "snapshot": "9b179c9e601d1a61711406b7b0c82a592dcd2b94",
+          "type": "step-finish",
+          "tokens": {
+            "total": 8452,
+            "input": 6577,
+            "output": 76,
+            "reasoning": 7,
+            "cache": {
+              "write": 0,
+              "read": 1792
+            }
+          },
+          "cost": 0,
+          "id": "prt_15b0a99ea001PwqMv7sFwXTlLm",
+          "sessionID": "ses_ea4f573acffeG4MY5YLmh5wWKl",
+          "messageID": "msg_15b0a8c7800132I29B1h0O7TcF"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_15b0a8c64001D43wdHwbVHvejQ",
+        "role": "assistant",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/home/dwight/git/poisonlog",
+          "root": "/home/dwight/git/poisonlog"
+        },
+        "cost": 0,
+        "tokens": {
+          "total": 12871,
+          "input": 4297,
+          "output": 126,
+          "reasoning": 0,
+          "cache": {
+            "write": 0,
+            "read": 8448
+          }
+        },
+        "modelID": "big-pickle",
+        "providerID": "opencode",
+        "time": {
+          "created": 1792528783880,
+          "completed": 1792528786323
+        },
+        "finish": "tool-calls",
+        "id": "msg_15b0a9a08001V7rXG88VTWPvH4",
+        "sessionID": "ses_ea4f573acffeG4MY5YLmh5wWKl"
+      },
+      "parts": [
+        {
+          "snapshot": "9b179c9e601d1a61711406b7b0c82a592dcd2b94",
+          "type": "step-start",
+          "id": "prt_15b0aa0ff001LhfOrmuaMj80Tb",
+          "sessionID": "ses_ea4f573acffeG4MY5YLmh5wWKl",
+          "messageID": "msg_15b0a9a08001V7rXG88VTWPvH4"
+        },
+        {
+          "type": "tool",
+          "tool": "read",
+          "callID": "call_be0481fbb35f4cc3af321449",
+          "state": {
+            "status": "completed",
+            "input": {
+              "filePath": "/home/dwight/git/poisonlog/APP.txt"
+            },
+            "output": "<path>/home/dwight/git/poisonlog/APP.txt</path>\n<type>file</type>\n<content>\n1: poison log app\n2: \n3: * create a Qt/QML 6.12 app in this directory. it should run on desktop linux initially.\n4: * this app is used to allow the user to note on a map where they have applied herbicides/pesticides.\n5: * the map should be a top down view of a piece of land, specified by address. there should be about 1 acre of land around the main structure visible.\n6: * the user enters the address, and can position the area around the structure, then clicks ok, and the image of the land is stored.\n7: * further operations on the map are done visually on the saved map, the map is fixed at that point.\n8: * when the user is looking at the map, they can drag rectangles on the map (multiple rectangles).\n9: * then they can enter some text in a text box to describe what was applied, how much, etc.\n10: * the description has a date field, and a tag name, and a color to draw the rectangle as well.\n11: * the user clicks \"commit\" and the info related to the rectangles and notes are stored in an sqlite database.\n12: * on the main windows, there is also a list on the side that lists all the committed records, sorted by date, newest to oldest.\n13: * selecting one of the records in the list displays the rectangles and notes on the map.\n14: * if the user is in the middle of entering new rectangles and notes, those must be saved, even if the user clicks an item in the list.\n15: * there is a button to resume editing after the user clicks away to view other notes.\n16: * the application should always start showing the partially entered notes.\n17: * there is a button to clear partially entered notes and discard them.\n\n(End of file - total 17 lines)\n</content>",
+            "metadata": {
+              "preview": "poison log app\n\n* create a Qt/QML 6.12 app in this directory. it should run on desktop linux initially.\n* this app is used to allow the user to note on a map where they have applied herbicides/pesticides.\n* the map should be a top down view of a piece of land, specified by address. there should be about 1 acre of land around the main structure visible.\n* the user enters the address, and can position the area around the structure, then clicks ok, and the image of the land is stored.\n* further operations on the map are done visually on the saved map, the map is fixed at that point.\n* when the user is looking at the map, they can drag rectangles on the map (multiple rectangles).\n* then they can enter some text in a text box to describe what was applied, how much, etc.\n* the description has a date field, and a tag name, and a color to draw the rectangle as well.\n* the user clicks \"commit\" and the info related to the rectangles and notes are stored in an sqlite database.\n* on the main windows, there is also a list on the side that lists all the committed records, sorted by date, newest to oldest.\n* selecting one of the records in the list displays the rectangles and notes on the map.\n* if the user is in the middle of entering new rectangles and notes, those must be saved, even if the user clicks an item in the list.\n* there is a button to resume editing after the user clicks away to view other notes.\n* the application should always start showing the partially entered notes.\n* there is a button to clear partially entered notes and discard them.",
+              "truncated": false,
+              "loaded": [],
+              "display": {
+                "type": "file",
+                "path": "/home/dwight/git/poisonlog/APP.txt",
+                "text": "poison log app\n\n* create a Qt/QML 6.12 app in this directory. it should run on desktop linux initially.\n* this app is used to allow the user to note on a map where they have applied herbicides/pesticides.\n* the map should be a top down view of a piece of land, specified by address. there should be about 1 acre of land around the main structure visible.\n* the user enters the address, and can position the area around the structure, then clicks ok, and the image of the land is stored.\n* further operations on the map are done visually on the saved map, the map is fixed at that point.\n* when the user is looking at the map, they can drag rectangles on the map (multiple rectangles).\n* then they can enter some text in a text box to describe what was applied, how much, etc.\n* the description has a date field, and a tag name, and a color to draw the rectangle as well.\n* the user clicks \"commit\" and the info related to the rectangles and notes are stored in an sqlite database.\n* on the main windows, there is also a list on the side that lists all the committed records, sorted by date, newest to oldest.\n* selecting one of the records in the list displays the rectangles and notes on the map.\n* if the user is in the middle of entering new rectangles and notes, those must be saved, even if the user clicks an item in the list.\n* there is a button to resume editing after the user clicks away to view other notes.\n* the application should always start showing the partially entered notes.\n* there is a button to clear partially entered notes and discard them.",
+                "lineStart": 1,
+                "lineEnd": 17,
+                "totalLines": 17,
+                "truncated": false
+              }
+            },
+            "title": "APP.txt",
+            "time": {
+              "start": 1792528786071,
+              "end": 1792528786085
+            }
+          },
+          "id": "prt_15b0aa1cc00172hT3SZ3tQDXQv",
+          "sessionID": "ses_ea4f573acffeG4MY5YLmh5wWKl",
+          "messageID": "msg_15b0a9a08001V7rXG88VTWPvH4"
+        },
+        {
+          "type": "tool",
+          "tool": "read",
+          "callID": "call_31489e16becc4c74a893c440",
+          "state": {
+            "status": "completed",
+            "input": {
+              "filePath": "/home/dwight/git/poisonlog/CMakeLists.txt"
+            },
+            "output": "<path>/home/dwight/git/poisonlog/CMakeLists.txt</path>\n<type>file</type>\n<content>\n1: cmake_minimum_required(VERSION 3.25)\n2: \n3: project(poisonlog VERSION 0.1 LANGUAGES CXX)\n4: \n5: set(CMAKE_CXX_STANDARD 20)\n6: set(CMAKE_CXX_STANDARD_REQUIRED ON)\n7: set(CMAKE_AUTOMOC ON)\n8: \n9: find_package(Qt6 6.12 REQUIRED COMPONENTS\n10:     Core\n11:     Gui\n12:     Qml\n13:     Quick\n14:     QuickControls2\n15:     Sql\n16:     Network\n17:     Test\n18: )\n19: \n20: qt_standard_project_setup(REQUIRES 6.12)\n21: \n22: qt_add_library(poisonlog_core STATIC\n23:     src/database.h\n24:     src/database.cpp\n25:     src/recordlistmodel.h\n26:     src/recordlistmodel.cpp\n27:     src/rectanglelistmodel.h\n28:     src/rectanglelistmodel.cpp\n29:     src/geocoder.h\n30:     src/geocoder.cpp\n31:     src/tileimageprovider.h\n32:     src/tileimageprovider.cpp\n33:     src/appstore.h\n34:     src/appstore.cpp\n35: )\n36: \n37: target_include_directories(poisonlog_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)\n38: \n39: target_link_libraries(poisonlog_core PUBLIC\n40:     Qt6::Core\n41:     Qt6::Gui\n42:     Qt6::Qml\n43:     Qt6::Quick\n44:     Qt6::Sql\n45:     Qt6::Network\n46: )\n47: \n48: qt_add_executable(poisonlog src/main.cpp)\n49: \n50: qt_add_qml_module(poisonlog\n51:     URI PoisonLog\n52:     VERSION 1.0\n53:     QML_FILES\n54:         qml/Main.qml\n55:         qml/MapSetupPage.qml\n56:         qml/MapCanvas.qml\n57:         qml/MapView.qml\n58:         qml/RecordList.qml\n59:         qml/EditorPanel.qml\n60: )\n61: \n62: target_link_libraries(poisonlog PRIVATE poisonlog_core Qt6::QuickControls2)\n63: \n64: enable_testing()\n65: \n66: qt_add_executable(tst_database tests/tst_database.cpp)\n67: target_link_libraries(tst_database PRIVATE poisonlog_core Qt6::Test)\n68: add_test(NAME tst_database COMMAND tst_database)\n69: \n70: qt_add_executable(tst_appstore tests/tst_appstore.cpp)\n71: target_link_libraries(tst_appstore PRIVATE poisonlog_core Qt6::Test)\n72: add_test(NAME tst_appstore COMMAND tst_appstore)\n\n(End of file - total 72 lines)\n</content>",
+            "metadata": {
+              "preview": "cmake_minimum_required(VERSION 3.25)\n\nproject(poisonlog VERSION 0.1 LANGUAGES CXX)\n\nset(CMAKE_CXX_STANDARD 20)\nset(CMAKE_CXX_STANDARD_REQUIRED ON)\nset(CMAKE_AUTOMOC ON)\n\nfind_package(Qt6 6.12 REQUIRED COMPONENTS\n    Core\n    Gui\n    Qml\n    Quick\n    QuickControls2\n    Sql\n    Network\n    Test\n)\n\nqt_standard_project_setup(REQUIRES 6.12)",
+              "truncated": false,
+              "loaded": [],
+              "display": {
+                "type": "file",
+                "path": "/home/dwight/git/poisonlog/CMakeLists.txt",
+                "text": "cmake_minimum_required(VERSION 3.25)\n\nproject(poisonlog VERSION 0.1 LANGUAGES CXX)\n\nset(CMAKE_CXX_STANDARD 20)\nset(CMAKE_CXX_STANDARD_REQUIRED ON)\nset(CMAKE_AUTOMOC ON)\n\nfind_package(Qt6 6.12 REQUIRED COMPONENTS\n    Core\n    Gui\n    Qml\n    Quick\n    QuickControls2\n    Sql\n    Network\n    Test\n)\n\nqt_standard_project_setup(REQUIRES 6.12)\n\nqt_add_library(poisonlog_core STATIC\n    src/database.h\n    src/database.cpp\n    src/recordlistmodel.h\n    src/recordlistmodel.cpp\n    src/rectanglelistmodel.h\n    src/rectanglelistmodel.cpp\n    src/geocoder.h\n    src/geocoder.cpp\n    src/tileimageprovider.h\n    src/tileimageprovider.cpp\n    src/appstore.h\n    src/appstore.cpp\n)\n\ntarget_include_directories(poisonlog_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)\n\ntarget_link_libraries(poisonlog_core PUBLIC\n    Qt6::Core\n    Qt6::Gui\n    Qt6::Qml\n    Qt6::Quick\n    Qt6::Sql\n    Qt6::Network\n)\n\nqt_add_executable(poisonlog src/main.cpp)\n\nqt_add_qml_module(poisonlog\n    URI PoisonLog\n    VERSION 1.0\n    QML_FILES\n        qml/Main.qml\n        qml/MapSetupPage.qml\n        qml/MapCanvas.qml\n        qml/MapView.qml\n        qml/RecordList.qml\n        qml/EditorPanel.qml\n)\n\ntarget_link_libraries(poisonlog PRIVATE poisonlog_core Qt6::QuickControls2)\n\nenable_testing()\n\nqt_add_executable(tst_database tests/tst_database.cpp)\ntarget_link_libraries(tst_database PRIVATE poisonlog_core Qt6::Test)\nadd_test(NAME tst_database COMMAND tst_database)\n\nqt_add_executable(tst_appstore tests/tst_appstore.cpp)\ntarget_link_libraries(tst_appstore PRIVATE poisonlog_core Qt6::Test)\nadd_test(NAME tst_appstore COMMAND tst_appstore)",
+                "lineStart": 1,
+                "lineEnd": 72,
+                "totalLines": 72,
+                "truncated": false
+              }
+            },
+            "title": "CMakeLists.txt",
+            "time": {
+              "start": 1792528786077,
+              "end": 1792528786088
+            }
+          },
+          "id": "prt_15b0aa299001G2Qt77SzboJPdA",
+          "sessionID": "ses_ea4f573acffeG4MY5YLmh5wWKl",
+          "messageID": "msg_15b0a9a08001V7rXG88VTWPvH4"
+        },
+        {
+          "type": "tool",
+          "tool": "bash",
+          "callID": "call_e0c12b299bcc46e58b344108",
+          "state": {
+            "status": "completed",
+            "input": {
+              "command": "ls qml src tests"
+            },
+            "output": "qml:\nEditorPanel.qml\nMain.qml\nMapCanvas.qml\nMapSetupPage.qml\nMapView.qml\nRecordList.qml\n\nsrc:\nappstore.cpp\nappstore.h\ndatabase.cpp\ndatabase.h\ngeocoder.cpp\ngeocoder.h\nmain.cpp\nrecordlistmodel.cpp\nrecordlistmodel.h\nrectanglelistmodel.cpp\nrectanglelistmodel.h\ntileimageprovider.cpp\ntileimageprovider.h\n\ntests:\ntst_appstore.cpp\ntst_database.cpp\n",
+            "metadata": {
+              "output": "qml:\nEditorPanel.qml\nMain.qml\nMapCanvas.qml\nMapSetupPage.qml\nMapView.qml\nRecordList.qml\n\nsrc:\nappstore.cpp\nappstore.h\ndatabase.cpp\ndatabase.h\ngeocoder.cpp\ngeocoder.h\nmain.cpp\nrecordlistmodel.cpp\nrecordlistmodel.h\nrectanglelistmodel.cpp\nrectanglelistmodel.h\ntileimageprovider.cpp\ntileimageprovider.h\n\ntests:\ntst_appstore.cpp\ntst_database.cpp\n",
+              "exit": 0,
+              "truncated": false
+            },
+            "title": "ls qml src tests",
+            "time": {
+              "start": 1792528786269,
+              "end": 1792528786284
+            }
+          },
+          "id": "prt_15b0aa358001RWhpLpTvLW6po1",
+          "sessionID": "ses_ea4f573acffeG4MY5YLmh5wWKl",
+          "messageID": "msg_15b0a9a08001V7rXG88VTWPvH4"
+        },
+        {
+          "reason": "tool-calls",
+          "snapshot": "9b179c9e601d1a61711406b7b0c82a592dcd2b94",
+          "type": "step-finish",
+          "tokens": {
+            "total": 12871,
+            "input": 4297,
+            "output": 126,
+            "reasoning": 0,
+            "cache": {
+              "write": 0,
+              "read": 8448
+            }
+          },
+          "cost": 0,
+          "id": "prt_15b0aa37d001XU8ywQLiganqrF",
+          "sessionID": "ses_ea4f573acffeG4MY5YLmh5wWKl",
+          "messageID": "msg_15b0a9a08001V7rXG88VTWPvH4"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_15b0a8c64001D43wdHwbVHvejQ",
+        "role": "assistant",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/home/dwight/git/poisonlog",
+          "root": "/home/dwight/git/poisonlog"
+        },
+        "cost": 0,
+        "tokens": {
+          "total": 14560,
+          "input": 1349,
+          "output": 411,
+          "reasoning": 0,
+          "cache": {
+            "write": 0,
+            "read": 12800
+          }
+        },
+        "modelID": "big-pickle",
+        "providerID": "opencode",
+        "time": {
+          "created": 1792528786325,
+          "completed": 1792528793037
+        },
+        "finish": "tool-calls",
+        "id": "msg_15b0aa395001xk1iScGa1eUzKz",
+        "sessionID": "ses_ea4f573acffeG4MY5YLmh5wWKl"
+      },
+      "parts": [
+        {
+          "snapshot": "9b179c9e601d1a61711406b7b0c82a592dcd2b94",
+          "type": "step-start",
+          "id": "prt_15b0aa97b001TQ2p02EPzxCPEa",
+          "sessionID": "ses_ea4f573acffeG4MY5YLmh5wWKl",
+          "messageID": "msg_15b0aa395001xk1iScGa1eUzKz"
+        },
+        {
+          "type": "tool",
+          "tool": "write",
+          "callID": "call_af33658070354746ac0ef899",
+          "state": {
+            "status": "completed",
+            "input": {
+              "filePath": "/home/dwight/git/poisonlog/README.md",
+              "content": "# PoisonLog\n\nDate: 2026-10-20\n\n**Vibe coded** — this project was built largely by AI-assisted, stream-of-consciousness coding.\n\nA Qt 6 / QML desktop application for recording where herbicides and pesticides are applied on a piece of land.\n\n## Overview\n\n- Set up a map by entering an address; the app geocodes it and captures a top-down map view (roughly one acre around the main structure).\n- Draw one or more rectangles on the saved map to mark treated areas.\n- Attach notes, a date, a tag name, and a color to the marked areas.\n- Commit records to a local SQLite database.\n- Browse committed records in a side list sorted newest to oldest; selecting one displays its rectangles and notes.\n- Partially entered work is preserved across record selection and application restarts, with options to resume or discard it.\n\n## Requirements\n\n- CMake 3.25+\n- Qt 6.12 (Core, Gui, Qml, Quick, QuickControls2, Sql, Network, Test)\n- A C++20 compiler\n\n## Build\n\n```sh\ncmake -S . -B build\ncmake --build build\n```\n\n## Run\n\n```sh\n./build/poisonlog\n```\n\n## Tests\n\n```sh\ncd build && ctest\n```\n\n## Project Layout\n\n- `src/` — C++ backend (database, models, geocoder, tile provider, app state)\n- `qml/` — QML UI (map setup, map canvas, record list, editor panel)\n- `tests/` — Qt Test suites for the database and app store\n"
+            },
+            "output": "Wrote file successfully.",
+            "metadata": {
+              "diagnostics": {},
+              "filepath": "/home/dwight/git/poisonlog/README.md",
+              "exists": false,
+              "truncated": false
+            },
+            "title": "README.md",
+            "time": {
+              "start": 1792528792979,
+              "end": 1792528792986
+            }
+          },
+          "id": "prt_15b0abd8c001S6WN9I2p0BHlx1",
+          "sessionID": "ses_ea4f573acffeG4MY5YLmh5wWKl",
+          "messageID": "msg_15b0aa395001xk1iScGa1eUzKz"
+        },
+        {
+          "reason": "tool-calls",
+          "snapshot": "72e95f4a99d40dd0bfae93b3c3d6925042f94349",
+          "type": "step-finish",
+          "tokens": {
+            "total": 14560,
+            "input": 1349,
+            "output": 411,
+            "reasoning": 0,
+            "cache": {
+              "write": 0,
+              "read": 12800
+            }
+          },
+          "cost": 0,
+          "id": "prt_15b0abdb70011ilSwH6pKp4SGI",
+          "sessionID": "ses_ea4f573acffeG4MY5YLmh5wWKl",
+          "messageID": "msg_15b0aa395001xk1iScGa1eUzKz"
+        },
+        {
+          "type": "patch",
+          "hash": "9b179c9e601d1a61711406b7b0c82a592dcd2b94",
+          "files": [
+            "/home/dwight/git/poisonlog/README.md"
+          ],
+          "id": "prt_15b0abdcb001rWIFTU3Oyf0wUM",
+          "sessionID": "ses_ea4f573acffeG4MY5YLmh5wWKl",
+          "messageID": "msg_15b0aa395001xk1iScGa1eUzKz"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_15b0a8c64001D43wdHwbVHvejQ",
+        "role": "assistant",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/home/dwight/git/poisonlog",
+          "root": "/home/dwight/git/poisonlog"
+        },
+        "cost": 0,
+        "tokens": {
+          "total": 14609,
+          "input": 111,
+          "output": 34,
+          "reasoning": 0,
+          "cache": {
+            "write": 0,
+            "read": 14464
+          }
+        },
+        "modelID": "big-pickle",
+        "providerID": "opencode",
+        "time": {
+          "created": 1792528793039,
+          "completed": 1792528795218
+        },
+        "finish": "stop",
+        "id": "msg_15b0abdcf0010jM0VXogT2uCAs",
+        "sessionID": "ses_ea4f573acffeG4MY5YLmh5wWKl"
+      },
+      "parts": [
+        {
+          "snapshot": "72e95f4a99d40dd0bfae93b3c3d6925042f94349",
+          "type": "step-start",
+          "id": "prt_15b0ac53c001df0UkNgjOUl58j",
+          "sessionID": "ses_ea4f573acffeG4MY5YLmh5wWKl",
+          "messageID": "msg_15b0abdcf0010jM0VXogT2uCAs"
+        },
+        {
+          "type": "text",
+          "text": "Created `README.md` with the date and \"vibe coded\" note near the top, plus overview, build/run/test instructions, and project layout.",
+          "time": {
+            "start": 1792528794959,
+            "end": 1792528795188
+          },
+          "id": "prt_15b0ac54f001aH8p9mSR7JnJTd",
+          "sessionID": "ses_ea4f573acffeG4MY5YLmh5wWKl",
+          "messageID": "msg_15b0abdcf0010jM0VXogT2uCAs"
+        },
+        {
+          "reason": "stop",
+          "snapshot": "72e95f4a99d40dd0bfae93b3c3d6925042f94349",
+          "type": "step-finish",
+          "tokens": {
+            "total": 14609,
+            "input": 111,
+            "output": 34,
+            "reasoning": 0,
+            "cache": {
+              "write": 0,
+              "read": 14464
+            }
+          },
+          "cost": 0,
+          "id": "prt_15b0ac63f0017OuBDxmqO7PI1V",
+          "sessionID": "ses_ea4f573acffeG4MY5YLmh5wWKl",
+          "messageID": "msg_15b0abdcf0010jM0VXogT2uCAs"
+        }
+      ]
+    }
+  ]
+}
